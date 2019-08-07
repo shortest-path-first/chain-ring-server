@@ -10,21 +10,23 @@ const sequelize = new Sequelize('chainring', 'root', '', {
 
 const User = sequelize.define('user', {
   name: {
-    type: sequelize.STRING
+    type: Sequelize.STRING
   },
   avgSpeed: {
     type: Sequelize.STRING
   },
   totalDistance: {
-    type: Sequelize.NUMBER
+    type: Sequelize.INTEGER
   }
 });
 
-const Ride = sequelize.define('user', {
+const Ride = sequelize.define('ride', {
   userId : {
-    type: Sequelize.NUMBER,
-    references: 'users',
-    referencesKey: 'id'
+    type: Sequelize.INTEGER,
+    references: {
+      model: 'users',
+      key: 'id'
+    },
   },
   lineString : {
     type: Sequelize.STRING, //Checkout Range
@@ -46,11 +48,13 @@ const Ride = sequelize.define('user', {
   },
 });
 
-const Route = sequelize.define('user', {
+const Route = sequelize.define('route', {
   userId: {
-    type: Sequelize.NUMBER,
-    references: 'users',
-    referencesKey: 'id'
+    type: Sequelize.INTEGER,
+    references: {
+      model: 'users',
+      key: 'id'
+    },
   },
   lineString: {
     type: Sequelize.STRING, //Checkout Range
@@ -72,21 +76,27 @@ const Route = sequelize.define('user', {
   },
 });
 
-const Marker = sequelize.define('user', {
+const Marker = sequelize.define('marker', {
   userId: {
-    type: Sequelize.NUMBER,
-    references: 'users',
-    referencesKey: 'id'
+    type: Sequelize.INTEGER,
+    references: {
+      model: 'users',
+      key: 'id'
+    },
   },
   rideId : {
-    type: Sequelize.NUMBER,
-    references: 'rides',
-    referencesKey: 'id'
+    type: Sequelize.INTEGER,
+    references: {
+      model: 'rides',
+      key: 'id'
+    },
   },
   routeId : {
-    type: Sequelize.NUMBER,
-    references: 'routes',
-    referencesKey: 'id'
+    type: Sequelize.INTEGER,
+    references: {
+      model: 'routes',
+      key: 'id'
+    },
   },
   markerLat : {
     type : Sequelize.STRING,
@@ -103,16 +113,20 @@ const Marker = sequelize.define('user', {
   }
 });
 
-const Location = sequelize.define('user', {
+const Location = sequelize.define('location', {
   userId: {
-    type: Sequelize.NUMBER,
-    references: 'users',
-    referencesKey: 'id'
+    type: Sequelize.INTEGER,
+    references: {
+      model: 'users',
+      key: 'id'
+    },
   },
   rideId: {
-    type: Sequelize.NUMBER,
-    references: 'rides',
-    referencesKey: 'id'
+    type: Sequelize.INTEGER,
+    references: {
+      model: 'rides',
+      key: 'id'
+    },
   },
   lat : {
     type : Sequelize.STRING,
@@ -122,37 +136,47 @@ const Location = sequelize.define('user', {
   },
 });
 
-const Stat = sequelize.define('user', {
+const Stat = sequelize.define('stat', {
   userId: {
-    type: Sequelize.NUMBER,
-    references: 'users',
-    referencesKey: 'id'
+    type: Sequelize.INTEGER,
+    references: {
+      model: 'users',
+      key: 'id'
+    },
   },
   rideId: {
-    type: Sequelize.NUMBER,
-    references: 'rides',
-    referencesKey: 'id'
+    type: Sequelize.INTEGER,
+    references: {
+      model: 'rides',
+      key: 'id'
+    },
   },
   avgSpeed: {
-    type: Sequelize.NUMBER,
+    type: Sequelize.INTEGER,
   },
   calBurned: {
-    type: Sequelize.NUMBER,
+    type: Sequelize.INTEGER,
   },
   costSavings: {
-    type: Sequelize.NUMBER,
+    type: Sequelize.INTEGER,
   },
   stationaryTime: {
-    type: Sequelize.NUMBER,
+    type: Sequelize.INTEGER,
   },
 });
 
+User.sync();
+Marker.sync();
+Location.sync();
+Stat.sync();
+Route.sync();
+Ride.sync();
 
 module.exports = {
-  User = sequelize.define('User', User, { tableName: 'users', timestamps: true }),
-  Marker = sequelize.define('Marker', Marker, {tableName: 'markers', timestamps: true}),
-  Location = sequelize.define('Location', Location, { tableName: 'locations', timestamps: true }),
-  Stat = sequelize.define('Stat', Stat, { tableName: 'stats', timestamps: true }),
-  Route = sequelize.define('Route', Route, { tableName: 'routes', timestamps: true }),
-  Ride = sequelize.define('Ride', Ride, { tableName: 'rides', timestamps: true }),
+  User,
+  Marker,
+  Location,
+  Stat,
+  Route,
+  Ride,
 }
