@@ -2,16 +2,20 @@ const Sequelize = require('sequelize');
 
 //! Run in mysql shell before running
 //! CREATE DATABASE IF NOT EXISTS chainring;
+//! use chainring;
 
 const sequelize = new Sequelize('chainring', 'root', '', {
   dialect: 'mysql'
 });
 
 const User = sequelize.define('user', {
+  name: {
+    type: sequelize.STRING
+  },
   avgSpeed: {
     type: Sequelize.STRING
   },
-  totalDistance : {
+  totalDistance: {
     type: Sequelize.NUMBER
   }
 });
@@ -93,9 +97,10 @@ const Marker = sequelize.define('user', {
   iconImage : {
     type : Sequelize.STRING,
   },
-  timeCreated : {
-    type : Sequelize.DATE,
-  },
+
+  type: {
+    type: Sequelize.STRING
+  }
 });
 
 const Location = sequelize.define('user', {
@@ -144,10 +149,10 @@ const Stat = sequelize.define('user', {
 
 
 module.exports = {
-  User,
-  Marker,
-  Location,
-  Stat,
-  Route,
-  Ride,
+  User = sequelize.define('User', User, { tableName: 'users', timestamps: true }),
+  Marker = sequelize.define('Marker', Marker, {tableName: 'markers', timestamps: true}),
+  Location = sequelize.define('Location', Location, { tableName: 'locations', timestamps: true }),
+  Stat = sequelize.define('Stat', Stat, { tableName: 'stats', timestamps: true }),
+  Route = sequelize.define('Route', Route, { tableName: 'routes', timestamps: true }),
+  Ride = sequelize.define('Ride', Ride, { tableName: 'rides', timestamps: true }),
 }
