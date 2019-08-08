@@ -1,30 +1,113 @@
-const {Marker, Location, User, Ride, Route, Stat} = require('./index');
+const {
+  Marker,
+  Location,
+  User,
+  Ride,
+  Route,
+  Stat,
+} = require('./index');
 
-console.log(models.User);
+console.log(User);
 
 const addMarker = () => {
-  Marker.build({}).save()
+  Marker.build({}).save();
 };
 
 const addLocation = () => {
-  Location.build({}).save()
+  Location.build({}).save();
 };
 
-const addUser = () => {
-  User.build({}).save()
+const addUser = username => User.build({
+  name: username,
+  avgSpeedCount: 0,
+}).save();
+
+
+const updateUser = ({
+  name,
+  speed,
+  distance,
+}, res) => {
+  if (speed !== undefined) {
+    User.findAll({
+      where: {
+        name,
+      },
+    })
+      .then((users) => {
+        const user = users[0];
+        if (user) {
+          const {
+            avgSpeedCount,
+          } = user;
+          const avgSpeed = (user.avgSpeed * avgSpeedCount + speed) / (avgSpeedCount + 1);
+          user.update({
+            avgSpeed,
+            avgSpeedCount: user.avgSpeedCount + 1,
+          });
+        }
+      })
+      .then(() => {
+        res.end('Speed updated');
+      });
+  }
+  if (distance !== undefined) {
+    User.findAll({
+      where: {
+        name,
+      },
+    })
+      .then((users) => {
+        const user = users[0];
+        if (user) {
+          user.update({
+            totalDistance: user.totalDistance + distance,
+          });
+        }
+      })
+      .then(() => {
+        res.end('Distance updated');
+      });
+  }
 };
 
 const addRide = () => {
-  Ride.build({}).save()
+  Ride.build({}).save();
 };
 
 const addRoute = () => {
-  Route.build({}).save()
+  Route.build({}).save();
 };
 
-const addStat = () => {
-  Stat.build({}).save()
-};
+const addStat = ({
+  username,
+}) => User.findAll({
+  where: {
+    name: username,
+  }
+    .then((users) => {
+      console.log(users);
+      return {
+        user: users[0],
+      };
+    })
+    .then(({
+      user,
+    }) => Stat.findAll({
+      where: {
+        userId: user.id,
+        // rideId: ,
+      },
+    })),
+  // Stat.build({
+  //   userId: ,
+  //   rideId: ,
+  //   avgSpeed: ,
+  //   calBurned: ,
+  //   costSavings: ,
+  //   stationaryTime: ,
+  // }).save();
+});
 
 module.exports = {
   addLocation,
@@ -33,4 +116,5 @@ module.exports = {
   addRoute,
   addStat,
   addUser,
-}
+  updateUser,
+};
