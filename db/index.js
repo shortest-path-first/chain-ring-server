@@ -5,47 +5,56 @@ const Sequelize = require('sequelize');
 //! use chainring;
 
 const sequelize = new Sequelize('chainring', 'root', '', {
-  dialect: 'mysql'
+  dialect: 'mysql',
 });
 
 const User = sequelize.define('user', {
   name: {
-    type: Sequelize.STRING
+    type: Sequelize.STRING,
   },
   avgSpeed: {
-    type: Sequelize.STRING
+    type: Sequelize.INTEGER,
+  },
+  avgSpeedCount: {
+    type: Sequelize.INTEGER,
   },
   totalDistance: {
-    type: Sequelize.INTEGER
-  }
+    type: Sequelize.INTEGER,
+  },
+},
+{
+  timestamps: false,
 });
 
 const Ride = sequelize.define('ride', {
-  userId : {
+  userId: {
     type: Sequelize.INTEGER,
     references: {
       model: 'users',
-      key: 'id'
+      key: 'id',
     },
   },
-  lineString : {
-    type: Sequelize.STRING, //Checkout Range
+  lineString: {
+    type: Sequelize.STRING, // Checkout Range
   },
-  routeTime : {
+  routeTime: {
     type: Sequelize.STRING,
   },
-  startLat : {
-    type: Sequelize.STRING,
+  startLat: {
+    type: Sequelize.FLOAT(11),
   },
-  startLon : {
-    type: Sequelize.STRING,
+  startLon: {
+    type: Sequelize.FLOAT(11),
   },
-  endLat : {
-    type: Sequelize.STRING,
+  endLat: {
+    type: Sequelize.FLOAT(11),
   },
-  endLon : {
-    type: Sequelize.STRING,
+  endLon: {
+    type: Sequelize.FLOAT(11),
   },
+},
+{
+  timestamps: false,
 });
 
 const Route = sequelize.define('route', {
@@ -53,27 +62,30 @@ const Route = sequelize.define('route', {
     type: Sequelize.INTEGER,
     references: {
       model: 'users',
-      key: 'id'
+      key: 'id',
     },
   },
   lineString: {
-    type: Sequelize.STRING, //Checkout Range
+    type: Sequelize.STRING, // Checkout Range
   },
   routeTime: {
     type: Sequelize.STRING,
   },
   startLat: {
-    type: Sequelize.STRING,
+    type: Sequelize.FLOAT(11),
   },
   startLon: {
-    type: Sequelize.STRING,
+    type: Sequelize.FLOAT(11),
   },
   endLat: {
-    type: Sequelize.STRING,
+    type: Sequelize.FLOAT(11),
   },
   endLon: {
-    type: Sequelize.STRING,
+    type: Sequelize.FLOAT(11),
   },
+},
+{
+  timestamps: false,
 });
 
 const Marker = sequelize.define('marker', {
@@ -81,36 +93,39 @@ const Marker = sequelize.define('marker', {
     type: Sequelize.INTEGER,
     references: {
       model: 'users',
-      key: 'id'
+      key: 'id',
     },
   },
-  rideId : {
+  rideId: {
     type: Sequelize.INTEGER,
     references: {
       model: 'rides',
-      key: 'id'
+      key: 'id',
     },
   },
-  routeId : {
+  routeId: {
     type: Sequelize.INTEGER,
     references: {
       model: 'routes',
-      key: 'id'
+      key: 'id',
     },
   },
-  markerLat : {
-    type : Sequelize.STRING,
+  markerLat: {
+    type: Sequelize.FLOAT(11),
   },
-  markerLon : {
-    type : Sequelize.STRING,
+  markerLon: {
+    type: Sequelize.FLOAT(11),
   },
-  iconImage : {
-    type : Sequelize.STRING,
+  iconImage: {
+    type: Sequelize.STRING,
   },
 
   type: {
-    type: Sequelize.STRING
-  }
+    type: Sequelize.STRING,
+  },
+},
+{
+  timestamps: false,
 });
 
 const Location = sequelize.define('location', {
@@ -118,22 +133,25 @@ const Location = sequelize.define('location', {
     type: Sequelize.INTEGER,
     references: {
       model: 'users',
-      key: 'id'
+      key: 'id',
     },
   },
   rideId: {
     type: Sequelize.INTEGER,
     references: {
       model: 'rides',
-      key: 'id'
+      key: 'id',
     },
   },
-  lat : {
-    type : Sequelize.STRING,
+  lat: {
+    type: Sequelize.FLOAT(11),
   },
-  lon : {
-    type: Sequelize.STRING,
+  lon: {
+    type: Sequelize.FLOAT(11),
   },
+},
+{
+  timestamps: false,
 });
 
 const Stat = sequelize.define('stat', {
@@ -141,36 +159,39 @@ const Stat = sequelize.define('stat', {
     type: Sequelize.INTEGER,
     references: {
       model: 'users',
-      key: 'id'
+      key: 'id',
     },
   },
   rideId: {
     type: Sequelize.INTEGER,
     references: {
       model: 'rides',
-      key: 'id'
+      key: 'id',
     },
   },
   avgSpeed: {
-    type: Sequelize.INTEGER,
+    type: Sequelize.FLOAT(11),
   },
   calBurned: {
-    type: Sequelize.INTEGER,
+    type: Sequelize.FLOAT(11),
   },
   costSavings: {
-    type: Sequelize.INTEGER,
+    type: Sequelize.FLOAT(11),
   },
   stationaryTime: {
     type: Sequelize.INTEGER,
   },
+},
+{
+  timestamps: false,
 });
 
 User.sync();
+Route.sync();
+Ride.sync();
 Marker.sync();
 Location.sync();
 Stat.sync();
-Route.sync();
-Ride.sync();
 
 module.exports = {
   User,
@@ -179,4 +200,4 @@ module.exports = {
   Stat,
   Route,
   Ride,
-}
+};
