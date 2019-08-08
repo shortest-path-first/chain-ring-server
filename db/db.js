@@ -22,6 +22,11 @@ const addUser = username => User.build({
   avgSpeedCount: 0,
 }).save();
 
+const getUser = username => User.findAll({
+  where: {
+    name: username,
+  },
+});
 
 const updateUser = ({
   name,
@@ -117,4 +122,5 @@ module.exports = {
   addStat,
   addUser,
   updateUser,
+  getUser,
 };
