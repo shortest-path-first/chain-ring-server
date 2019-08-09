@@ -7,7 +7,7 @@ const app = express();
 app.use(express.json());
 const port = process.env.PORT || 3000;
 
-app.use(express.json())
+app.use(express.json());
 
 const info = {
   "html_attributions": [],
@@ -737,11 +737,7 @@ app.get('/mapSearch', (req, res) => {
   // .catch((err) =>{
   //   res.send(err);
   // })
-  let filteredResults = info.results.map((obj) => {
-    return [obj.geometry.location, obj.name, obj.vicinity];
-  })
-
-  res.send(filteredResults);
+  res.send(info);
 });
 
 app.post('/user', (req, res) => {
@@ -756,6 +752,15 @@ app.post('/user', (req, res) => {
 app.patch('/user', (req, res) => {
   const { name, speed, distance } = req.body;
   db.updateUser({ name, speed, distance }, res);
+});
+
+app.post('/rides', (req, res) => {
+  
+  const {markers} = req.body;
+  console.log(markers);
+  db.addMarker()
+  res.statusCode = 201;
+  res.end('Rides sent');
 });
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
