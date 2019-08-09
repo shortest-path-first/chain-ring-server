@@ -737,7 +737,11 @@ app.get('/mapSearch', (req, res) => {
   // .catch((err) =>{
   //   res.send(err);
   // })
-  res.send(info);
+  let filteredResults = info.results.map((obj) => {
+    return [obj.geometry.location, obj.name, obj.vicinity];
+  })
+
+  res.send(filteredResults);
 });
 
 app.post('/user', (req, res) => {
