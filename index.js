@@ -21,11 +21,30 @@ app.get('/mapSearch', (req, res) => {
   // .catch((err) =>{
   //   res.send(err);
   // })
-  res.send(info);
+  const filteredResults = info.results.map(obj => [obj.geometry.location, obj.name, obj.vicinity]);
+  res.send(filteredResults);
 });
 
+app.get('/mapPolyline', (req, res) => {
+  // need to pass in location dynamically
+
+  const { place } = req.query;
+  // axios.get(`https://maps.googleapis.com/maps/api/directions/json?origin=29.977830, -90.079930&destination=${place}&key=AIzaSyAm0rv3w8tQUIPbjDkQyGhQUsK5rAxfBUs&mode=bicycling`)
+  //   .then((response)=> {
+  //     let polyLine = response.data.routes[0].overview_polyline.points
+  //     res.send({polyLine});
+  //   })
+  //   .catch((err) =>{
+  //     res.send(err);
+  //   });
+
+  const polyLine = 'ca~uDzxxdPtAb@xAaC~CeFhD}FtDcGdGyJbA_Bl@s@b@u@~@aB|DoGbJiOBEzAeC~BqDhFyI~DoG~DuGvCaFjBuCpBeDlB`BvCnCxChCvMdLlD|CfIdHhC|BtFrElGrFZXtChBVHtB`@pAoENW`AmDXaAvCl@`B\\bLvB`FdAxKvBdKrB`Ez@z@PpGlAlj@zKv@LdD_ExBeClL}Mt@{@pA{AbD~DfAbAhBdBl@fA';
+  console.log(place);
+  res.send({ polyLine });
+});
+
+
 app.get('/user/:username', (req, res) => {
-  console.log(req.params.username);
   const {
     username,
   } = req.params;
