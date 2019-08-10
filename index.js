@@ -1,7 +1,8 @@
 const express = require('express');
 const axios = require('axios');
+const polyline = require('google-polyline');
 const db = require('./db/db');
-const info = require('./data');
+const { info } = require('./data');
 
 
 const app = express();
@@ -23,13 +24,19 @@ app.get('/mapSearch', (req, res) => {
   res.send(info);
 });
 
-app.get('/user', (req, res) => {
+app.get('/user/:username', (req, res) => {
+  console.log(req.params.username);
   const {
     username,
-  } = req.body;
+  } = req.params;
   db.getUser(username)
     .then((users) => {
       res.send(users[0]);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.statusCode = (500);
+      res.end('Something Went Wrong');
     });
 });
 app.post('/user', (req, res) => {
@@ -77,10 +84,18 @@ app.patch('/location', (req, res) => {
 });
 
 app.get('/stat', (req, res) => {
+  db.getStat('Peter')
+    .then((something) => {
+      console.log(something);
+    });
   res.end();
 });
 app.post('/stat', (req, res) => {
-  res.end();
+  // const coords = req.body.polyline;
+  // console.log(coords);
+  // console.log(polyline.decode(coords));
+  // res.send(polyline.decode(coords));
+  db.addStat({ username: 'Peter', lineString: 'yd}uDhjsdPaBH@l@t@lZ|@r]ZpMDjDFl@IfAIRiB`AsElBaEpB{Ax@gAf@oB`AcBz@sFjCgLtF{G~CiB~@gAh@[TaBn@eAh@{BbAaHdD_EnBsAj@iCr@uAlAi@XgFdCaHhDiFdCaGrC}BfAcEjBmEvB{OnHs@^LlEl@jUFrB@`BExCOpBc@hCYhAa@dAgGjNIPUTOLa@PUDMHQ^?d@@F@F?j@CTCTMToDdIhE`C|@Xh@^p@Xx@L\\@h@Eb@U~@S' }, res);
 });
 app.patch('/stat', (req, res) => {
   res.end();
@@ -100,6 +115,10 @@ app.get('/ride', (req, res) => {
   res.end();
 });
 app.post('/ride', (req, res) => {
+  const coords = req.body.polyline;
+  console.log(coords);
+  console.log(polyline.decode(coords));
+  db.addRide(coords, polyline.decode(coords));
   res.end();
 });
 app.patch('/ride', (req, res) => {
