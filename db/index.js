@@ -13,13 +13,16 @@ const User = sequelize.define('user', {
     type: Sequelize.STRING,
   },
   avgSpeed: {
-    type: Sequelize.INTEGER,
+    type: Sequelize.FLOAT(11),
   },
   avgSpeedCount: {
     type: Sequelize.INTEGER,
   },
   totalDistance: {
-    type: Sequelize.INTEGER,
+    type: Sequelize.FLOAT(11),
+  },
+  totalSavings: {
+    type: Sequelize.FLOAT(11),
   },
 },
 {
@@ -169,10 +172,13 @@ const Stat = sequelize.define('stat', {
       key: 'id',
     },
   },
+  routeTime: {
+    type: Sequelize.FLOAT(11),
+  },
   avgSpeed: {
     type: Sequelize.FLOAT(11),
   },
-  calBurned: {
+  totalDistance: {
     type: Sequelize.FLOAT(11),
   },
   costSavings: {
