@@ -43,6 +43,17 @@ app.get('/mapPolyline', (req, res) => {
   res.send({ polyLine });
 });
 
+app.get('/userTotals', (req, res) => {
+  console.log(req);
+  let object = {
+      avgSpeed: 20,
+      totalDistance:  100,
+      costSavings: 200,
+      stationaryTime: 800
+  }
+  res.send(object);
+});
+
 
 app.get('/user/:username', (req, res) => {
   const {
