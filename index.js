@@ -23,12 +23,8 @@ app.get('/mapSearch', (req, res) => {
   // .catch((err) =>{
   //   res.send(err);
   // })
-<<<<<<< HEAD
-  res.send(info);
-=======
   const filteredResults = info.results.map(obj => [obj.geometry.location, obj.name, obj.vicinity]);
   res.send(filteredResults);
->>>>>>> d47e07acb25be45f68d101c66edccc06cc69ba4d
 });
 
 app.get('/mapPolyline', (req, res) => {
@@ -145,16 +141,13 @@ app.get('/ride', (req, res) => {
 });
 
 app.post('/ride', (req, res) => {
-<<<<<<< HEAD
   // req.body contains pathpolyline, first and last points with timestamps
   console.log(req.body);
   res.statusCode = 201;
-=======
   const coords = req.body.polyline;
   console.log(coords);
   console.log(polyline.decode(coords));
   db.addRide(coords, polyline.decode(coords));
->>>>>>> d47e07acb25be45f68d101c66edccc06cc69ba4d
   res.end();
 });
 
