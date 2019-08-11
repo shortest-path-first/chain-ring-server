@@ -689,4 +689,919 @@ const info = {
   status: 'OK',
 };
 
-module.exports = info;
+const distanceTime = {
+  destination_addresses: [
+    '1521 St Roch Ave, New Orleans, LA 70117, USA',
+    'N. Claiborne Ave. at St. Roch Ave., New Orleans, LA 70117, USA',
+    '1540 St Roch Ave, New Orleans, LA 70117, USA',
+    'N. Claiborne Ave. at Elysian Fields Ave., New Orleans, LA 70117, USA',
+    'N. Claiborne Ave. at St. Anthony St., New Orleans, LA 70116, USA',
+    '1659 N Claiborne Ave, New Orleans, LA 70116, USA',
+    'N. Claiborne Ave. at St. Bernard St., New Orleans, LA 70116, USA',
+    'N. Claiborne Ave. at St. Bernard St., New Orleans, LA 70116, USA',
+    'St Bernard at N. Claiborne, New Orleans, LA 70116, USA',
+    'St Bernard at N. Claiborne, New Orleans, LA 70116, USA',
+    '1639 St Bernard Ave, New Orleans, LA 70116, USA',
+    '1737 St Bernard Ave, New Orleans, LA 70116, USA',
+    'St. Bernard Ave. at N. Prieur St., New Orleans, LA 70116, USA',
+    '1925 St Bernard Ave, New Orleans, LA 70116, USA',
+    "1933 D'Abadie St, New Orleans, LA 70116, USA",
+    '2001 St Bernard Ave, New Orleans, LA 70116, USA',
+    'St. Bernard Ave. at N. Galvez St., New Orleans, LA 70116, USA',
+    '2201 St Bernard Ave, New Orleans, LA 70119, USA',
+    '2401 St Bernard Ave, New Orleans, LA 70119, USA',
+    '2525 St Bernard Ave, New Orleans, LA 70119, USA',
+    '3 Castiglione St, New Orleans, LA 70119, USA',
+    'St. Bernard Ave. at N. Broad St., New Orleans, LA 70119, USA',
+    'St Bernard at Broad, New Orleans, LA 70119, USA',
+    '2603 St Bernard Ave, New Orleans, LA 70119, USA',
+    '2611 St Bernard Ave, New Orleans, LA 70119, USA',
+    '1 Duels St, New Orleans, LA 70119, USA',
+    '2825 St Bernard Ave, New Orleans, LA 70119, USA',
+    '2911 St Bernard Ave, New Orleans, LA 70119, USA',
+    '1501 Abundance St, New Orleans, LA 70119, USA',
+    'St. Bernard Ave. at Gentilly Blvd. (Nearside), New Orleans, LA 70119, USA',
+    'Desaix Circle, New Orleans, LA 70119, USA',
+    'St Bernard at Desaix, New Orleans, LA 70119, USA',
+    '3152 St Bernard Ave, New Orleans, LA 70119, USA',
+    '3233 St Bernard Ave, New Orleans, LA 70119, USA',
+    '1453 Lafreniere St, New Orleans, LA 70122, USA',
+    '3611 St Bernard Ave, New Orleans, LA 70122, USA',
+    '1401 St Denis St, New Orleans, LA 70122, USA',
+    'St. Bernard Ave. at Milton St., New Orleans, LA 70122, USA',
+    'St. Bernard Ave. at Foy St., New Orleans, LA 70122, USA',
+    '4149 St Bernard Ave, New Orleans, LA 70122, USA',
+    '4203 Buchanan St, New Orleans, LA 70122, USA',
+    '4201 Cadillac St, New Orleans, LA 70122, USA',
+    '4603 Wisner Blvd, New Orleans, LA 70122, USA',
+    '4601 Wisner Blvd, New Orleans, LA 70122, USA',
+    'Harrison Ave, New Orleans, LA 70122, USA',
+    'Harrison Ave, New Orleans, LA 70122, USA',
+    'Harrison Ave, New Orleans, LA 70122, USA',
+    'Harrison Ave, New Orleans, LA 70122, USA',
+    'Harrison Ave, New Orleans, LA 70122, USA',
+    'Harrison Ave, New Orleans, LA 70122, USA',
+    'Harrison Ave, New Orleans, LA 70124, USA',
+    'Harrison Ave, New Orleans, LA 70122, USA',
+    'Harrison Ave, New Orleans, LA 70124, USA',
+    'Harrison Ave, New Orleans, LA 70124, USA',
+    'Harrison Ave, New Orleans, LA 70124, USA',
+    'Harrison Ave, New Orleans, LA 70124, USA',
+    'Harrison Ave, New Orleans, LA 70124, USA',
+    '1001 Harrison Ave, New Orleans, LA 70124, USA',
+    '1001 Harrison Ave, New Orleans, LA 70124, USA',
+    '1001 Harrison Ave, New Orleans, LA 70124, USA',
+    '1001 Harrison Ave, New Orleans, LA 70124, USA',
+    '1001 Harrison Ave, New Orleans, LA 70124, USA',
+    '1001 Harrison Ave, New Orleans, LA 70124, USA',
+    '1001 Harrison Ave, New Orleans, LA 70124, USA',
+    '1001 Harrison Ave, New Orleans, LA 70124, USA',
+    '1009 Harrison Ave, New Orleans, LA 70124, USA',
+    '1009 Harrison Ave, New Orleans, LA 70124, USA',
+    '40 Magnolia Dr, New Orleans, LA 70124, USA',
+    '40 Magnolia Dr, New Orleans, LA 70124, USA',
+    '40 Magnolia Dr, New Orleans, LA 70124, USA',
+    '60 Magnolia Dr, New Orleans, LA 70124, USA',
+    '60 Magnolia Dr, New Orleans, LA 70124, USA',
+    '60 Magnolia Dr, New Orleans, LA 70124, USA',
+    '60 Magnolia Dr, New Orleans, LA 70124, USA',
+    '60 Magnolia Dr, New Orleans, LA 70124, USA',
+  ],
+  origin_addresses: [
+    '1521 St Roch Ave, New Orleans, LA 70117, USA',
+  ],
+  rows: [{
+    elements: [{
+      distance: {
+        text: '1 ft',
+        value: 0,
+      },
+      duration: {
+        text: '1 min',
+        value: 0,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '177 ft',
+        value: 54,
+      },
+      duration: {
+        text: '1 min',
+        value: 10,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '253 ft',
+        value: 77,
+      },
+      duration: {
+        text: '1 min',
+        value: 88,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '0.3 mi',
+        value: 500,
+      },
+      duration: {
+        text: '3 mins',
+        value: 165,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '0.6 mi',
+        value: 974,
+      },
+      duration: {
+        text: '5 mins',
+        value: 319,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '0.7 mi',
+        value: 1199,
+      },
+      duration: {
+        text: '6 mins',
+        value: 358,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '0.8 mi',
+        value: 1282,
+      },
+      duration: {
+        text: '7 mins',
+        value: 393,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '0.8 mi',
+        value: 1305,
+      },
+      duration: {
+        text: '7 mins',
+        value: 397,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '0.8 mi',
+        value: 1340,
+      },
+      duration: {
+        text: '7 mins',
+        value: 403,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '0.8 mi',
+        value: 1351,
+      },
+      duration: {
+        text: '7 mins',
+        value: 405,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '0.9 mi',
+        value: 1418,
+      },
+      duration: {
+        text: '7 mins',
+        value: 447,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '1.1 mi',
+        value: 1729,
+      },
+      duration: {
+        text: '8 mins',
+        value: 450,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '1.1 mi',
+        value: 1750,
+      },
+      duration: {
+        text: '8 mins',
+        value: 454,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '1.1 mi',
+        value: 1808,
+      },
+      duration: {
+        text: '8 mins',
+        value: 464,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '1.2 mi',
+        value: 1853,
+      },
+      duration: {
+        text: '8 mins',
+        value: 472,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '1.2 mi',
+        value: 1923,
+      },
+      duration: {
+        text: '8 mins',
+        value: 483,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '1.2 mi',
+        value: 1985,
+      },
+      duration: {
+        text: '8 mins',
+        value: 494,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '1.3 mi',
+        value: 2137,
+      },
+      duration: {
+        text: '9 mins',
+        value: 562,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '1.5 mi',
+        value: 2400,
+      },
+      duration: {
+        text: '10 mins',
+        value: 608,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '1.6 mi',
+        value: 2576,
+      },
+      duration: {
+        text: '11 mins',
+        value: 640,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '1.6 mi',
+        value: 2643,
+      },
+      duration: {
+        text: '11 mins',
+        value: 651,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '1.7 mi',
+        value: 2687,
+      },
+      duration: {
+        text: '11 mins',
+        value: 659,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '1.7 mi',
+        value: 2707,
+      },
+      duration: {
+        text: '11 mins',
+        value: 662,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '1.7 mi',
+        value: 2766,
+      },
+      duration: {
+        text: '12 mins',
+        value: 713,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '1.7 mi',
+        value: 2810,
+      },
+      duration: {
+        text: '12 mins',
+        value: 721,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '1.8 mi',
+        value: 2886,
+      },
+      duration: {
+        text: '12 mins',
+        value: 735,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '1.9 mi',
+        value: 3066,
+      },
+      duration: {
+        text: '14 mins',
+        value: 813,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '2.0 mi',
+        value: 3186,
+      },
+      duration: {
+        text: '14 mins',
+        value: 835,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '2.0 mi',
+        value: 3237,
+      },
+      duration: {
+        text: '14 mins',
+        value: 844,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '2.1 mi',
+        value: 3318,
+      },
+      duration: {
+        text: '14 mins',
+        value: 857,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '2.1 mi',
+        value: 3378,
+      },
+      duration: {
+        text: '15 mins',
+        value: 909,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '2.1 mi',
+        value: 3405,
+      },
+      duration: {
+        text: '15 mins',
+        value: 913,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '2.2 mi',
+        value: 3549,
+      },
+      duration: {
+        text: '16 mins',
+        value: 940,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '2.3 mi',
+        value: 3730,
+      },
+      duration: {
+        text: '16 mins',
+        value: 971,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '2.4 mi',
+        value: 3874,
+      },
+      duration: {
+        text: '17 mins',
+        value: 994,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '2.5 mi',
+        value: 4035,
+      },
+      duration: {
+        text: '17 mins',
+        value: 1044,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '2.6 mi',
+        value: 4113,
+      },
+      duration: {
+        text: '18 mins',
+        value: 1058,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '2.6 mi',
+        value: 4234,
+      },
+      duration: {
+        text: '18 mins',
+        value: 1078,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '2.7 mi',
+        value: 4363,
+      },
+      duration: {
+        text: '18 mins',
+        value: 1100,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '2.9 mi',
+        value: 4697,
+      },
+      duration: {
+        text: '19 mins',
+        value: 1158,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '2.9 mi',
+        value: 4730,
+      },
+      duration: {
+        text: '19 mins',
+        value: 1164,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '3.0 mi',
+        value: 4830,
+      },
+      duration: {
+        text: '20 mins',
+        value: 1202,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '3.2 mi',
+        value: 5175,
+      },
+      duration: {
+        text: '21 mins',
+        value: 1264,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '3.3 mi',
+        value: 5231,
+      },
+      duration: {
+        text: '21 mins',
+        value: 1275,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '3.3 mi',
+        value: 5278,
+      },
+      duration: {
+        text: '22 mins',
+        value: 1303,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '3.3 mi',
+        value: 5353,
+      },
+      duration: {
+        text: '22 mins',
+        value: 1316,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '3.4 mi',
+        value: 5408,
+      },
+      duration: {
+        text: '22 mins',
+        value: 1325,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '3.4 mi',
+        value: 5478,
+      },
+      duration: {
+        text: '22 mins',
+        value: 1337,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '3.4 mi',
+        value: 5516,
+      },
+      duration: {
+        text: '22 mins',
+        value: 1343,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '3.5 mi',
+        value: 5555,
+      },
+      duration: {
+        text: '23 mins',
+        value: 1350,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '3.6 mi',
+        value: 5834,
+      },
+      duration: {
+        text: '23 mins',
+        value: 1400,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '3.6 mi',
+        value: 5844,
+      },
+      duration: {
+        text: '23 mins',
+        value: 1402,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '3.6 mi',
+        value: 5860,
+      },
+      duration: {
+        text: '23 mins',
+        value: 1405,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '3.6 mi',
+        value: 5871,
+      },
+      duration: {
+        text: '23 mins',
+        value: 1407,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '3.7 mi',
+        value: 5892,
+      },
+      duration: {
+        text: '24 mins',
+        value: 1411,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '3.7 mi',
+        value: 5904,
+      },
+      duration: {
+        text: '24 mins',
+        value: 1424,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '3.7 mi',
+        value: 5914,
+      },
+      duration: {
+        text: '24 mins',
+        value: 1425,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '3.7 mi',
+        value: 5932,
+      },
+      duration: {
+        text: '24 mins',
+        value: 1429,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '3.7 mi',
+        value: 5976,
+      },
+      duration: {
+        text: '24 mins',
+        value: 1425,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '3.7 mi',
+        value: 5954,
+      },
+      duration: {
+        text: '24 mins',
+        value: 1432,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '3.7 mi',
+        value: 5958,
+      },
+      duration: {
+        text: '24 mins',
+        value: 1433,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '3.7 mi',
+        value: 5980,
+      },
+      duration: {
+        text: '24 mins',
+        value: 1436,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '3.7 mi',
+        value: 5991,
+      },
+      duration: {
+        text: '24 mins',
+        value: 1438,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '3.7 mi',
+        value: 6001,
+      },
+      duration: {
+        text: '24 mins',
+        value: 1440,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '3.7 mi',
+        value: 6029,
+      },
+      duration: {
+        text: '24 mins',
+        value: 1433,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '3.9 mi',
+        value: 6213,
+      },
+      duration: {
+        text: '25 mins',
+        value: 1492,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '3.9 mi',
+        value: 6342,
+      },
+      duration: {
+        text: '26 mins',
+        value: 1532,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '4.0 mi',
+        value: 6378,
+      },
+      duration: {
+        text: '26 mins',
+        value: 1539,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '4.0 mi',
+        value: 6406,
+      },
+      duration: {
+        text: '26 mins',
+        value: 1544,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '4.0 mi',
+        value: 6437,
+      },
+      duration: {
+        text: '26 mins',
+        value: 1549,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '4.0 mi',
+        value: 6470,
+      },
+      duration: {
+        text: '26 mins',
+        value: 1554,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '4.0 mi',
+        value: 6487,
+      },
+      duration: {
+        text: '26 mins',
+        value: 1557,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '4.0 mi',
+        value: 6510,
+      },
+      duration: {
+        text: '26 mins',
+        value: 1561,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '4.1 mi',
+        value: 6533,
+      },
+      duration: {
+        text: '26 mins',
+        value: 1565,
+      },
+      status: 'OK',
+    },
+    {
+      distance: {
+        text: '4.1 mi',
+        value: 6570,
+      },
+      duration: {
+        text: '26 mins',
+        value: 1571,
+      },
+      status: 'OK',
+    },
+    ],
+  }],
+  status: 'OK',
+};
+
+module.exports = {
+  info,
+  distanceTime,
+};
