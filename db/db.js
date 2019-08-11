@@ -1,3 +1,7 @@
+const polyline = require('google-polyline');
+const {
+  distanceTime,
+} = require('../data');
 const {
   Marker,
   Location,
@@ -32,6 +36,8 @@ const updateUser = ({
   name,
   speed,
   distance,
+  savings,
+  // stationaryTime
 }, res) => {
   if (speed !== undefined) {
     User.findAll({
@@ -74,10 +80,36 @@ const updateUser = ({
         res.end('Distance updated');
       });
   }
+  if (savings !== undefined) {
+    User.findAll({
+      where: {
+        name,
+      },
+    })
+      .then((users) => {
+        const user = users[0];
+        if (user) {
+          user.update({
+            totalSavings: user.totalSavings + savings,
+          });
+        }
+      })
+      .then(() => {
+        res.end('Savings updated');
+      });
+  }
 };
 
-const addRide = () => {
-  Ride.build({}).save();
+const addRide = (lineString, coords) => {
+  Ride.build({
+    userId: 2,
+    lineString,
+    routeTime: 15,
+    startLat: coords[0][0],
+    startLon: coords[0][1],
+    endLat: coords[coords.length - 1][0],
+    endLon: coords[coords.length - 1][1],
+  }).save();
 };
 
 const addRoute = () => {
@@ -86,33 +118,69 @@ const addRoute = () => {
 
 const addStat = ({
   username,
-}) => User.findAll({
+  lineString,
+}, res) => User.findAll({
   where: {
     name: username,
-  }
-    .then((users) => {
-      console.log(users);
-      return {
-        user: users[0],
-      };
-    })
-    .then(({
-      user,
-    }) => Stat.findAll({
+  },
+}).then((users) => {
+  console.log(users);
+  return {
+    user: users[0],
+  };
+})
+  .then(({
+    user,
+  }) => Ride.findAll({
+    where: {
+      userId: user.id,
+      lineString,
+    },
+  })
+    .then((rides) => {
+      console.log('rides', user);
+      return { ride: rides[0], user };
+    }))
+  .then(({ ride, user }) => {
+    // console.log(props);
+    let { distance, duration } = distanceTime.rows[distanceTime.rows.length - 1]
+      .elements[distanceTime.rows[distanceTime.rows.length - 1].elements.length - 1];
+    distance = Number(distance.text.match(/[1-9,.]/g).join(''));
+    duration = Number(duration.text.match(/[1-9]/g).join(''));
+    console.log(duration);
+    const avgSpeed = (distance) * (60 / duration);
+    const savings = distance * 2.660;
+    Stat.build({
+      userId: user.id,
+      rideId: ride.id,
+      avgSpeed,
+      costSavings: savings,
+      // stationaryTime: ,
+    }).save();
+    updateUser({
+      name: user.name,
+      distance,
+      speed: avgSpeed,
+      savings,
+    }, res);
+  });
+
+const getStat = username => User.findAll({
+  where: {
+    name: username,
+  },
+})
+  .then((users) => {
+    const user = users[0];
+    return Stat.findAll({
       where: {
         userId: user.id,
-        // rideId: ,
       },
-    })),
-  // Stat.build({
-  //   userId: ,
-  //   rideId: ,
-  //   avgSpeed: ,
-  //   calBurned: ,
-  //   costSavings: ,
-  //   stationaryTime: ,
-  // }).save();
-});
+    });
+  })
+  .then(
+    stats => stats.slice(0, 6),
+  );
 
 module.exports = {
   addLocation,
@@ -120,6 +188,7 @@ module.exports = {
   addRide,
   addRoute,
   addStat,
+  getStat,
   addUser,
   updateUser,
   getUser,
