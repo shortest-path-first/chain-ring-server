@@ -2,7 +2,9 @@ const express = require('express');
 const axios = require('axios');
 const polyline = require('google-polyline');
 const db = require('./db/db');
-const { info } = require('./data');
+const {
+  info,
+} = require('./data');
 
 
 const app = express();
@@ -28,7 +30,9 @@ app.get('/mapSearch', (req, res) => {
 app.get('/mapPolyline', (req, res) => {
   // need to pass in location dynamically
 
-  const { place } = req.query;
+  const {
+    place,
+  } = req.query;
   // axios.get(`https://maps.googleapis.com/maps/api/directions/json?origin=29.977830, -90.079930&destination=${place}&key=AIzaSyAm0rv3w8tQUIPbjDkQyGhQUsK5rAxfBUs&mode=bicycling`)
   //   .then((response)=> {
   //     let polyLine = response.data.routes[0].overview_polyline.points
@@ -40,7 +44,9 @@ app.get('/mapPolyline', (req, res) => {
 
   const polyLine = 'ca~uDzxxdPtAb@xAaC~CeFhD}FtDcGdGyJbA_Bl@s@b@u@~@aB|DoGbJiOBEzAeC~BqDhFyI~DoG~DuGvCaFjBuCpBeDlB`BvCnCxChCvMdLlD|CfIdHhC|BtFrElGrFZXtChBVHtB`@pAoENW`AmDXaAvCl@`B\\bLvB`FdAxKvBdKrB`Ez@z@PpGlAlj@zKv@LdD_ExBeClL}Mt@{@pA{AbD~DfAbAhBdBl@fA';
   console.log(place);
-  res.send({ polyLine });
+  res.send({
+    polyLine,
+  });
 });
 
 
@@ -102,19 +108,29 @@ app.patch('/location', (req, res) => {
   res.end();
 });
 
-app.get('/stat', (req, res) => {
-  db.getStat('Peter')
+app.get('/stat/:username', (req, res) => {
+  const {
+    username,
+  } = req.params;
+  db.getStat(username)
     .then((something) => {
       console.log(something);
+      res.send(something);
     });
-  res.end();
 });
 app.post('/stat', (req, res) => {
+  const {
+    username,
+    lineString,
+  } = req.body;
   // const coords = req.body.polyline;
   // console.log(coords);
   // console.log(polyline.decode(coords));
   // res.send(polyline.decode(coords));
-  db.addStat({ username: 'Peter', lineString: 'yd}uDhjsdPaBH@l@t@lZ|@r]ZpMDjDFl@IfAIRiB`AsElBaEpB{Ax@gAf@oB`AcBz@sFjCgLtF{G~CiB~@gAh@[TaBn@eAh@{BbAaHdD_EnBsAj@iCr@uAlAi@XgFdCaHhDiFdCaGrC}BfAcEjBmEvB{OnHs@^LlEl@jUFrB@`BExCOpBc@hCYhAa@dAgGjNIPUTOLa@PUDMHQ^?d@@F@F?j@CTCTMToDdIhE`C|@Xh@^p@Xx@L\\@h@Eb@U~@S' }, res);
+  db.addStat({
+    username,
+    lineString,
+  }, res);
 });
 app.patch('/stat', (req, res) => {
   res.end();
@@ -134,11 +150,24 @@ app.get('/ride', (req, res) => {
   res.end();
 });
 app.post('/ride', (req, res) => {
-  const coords = req.body.polyline;
+  const {
+    username,
+    lineString,
+    routeTime,
+  } = req.body;
+
+  const coords = polyline.decode(lineString);
+
+  db.addRide({
+    username,
+    lineString,
+    routeTime,
+  }, coords, res);
+
   console.log(coords);
-  console.log(polyline.decode(coords));
-  db.addRide(coords, polyline.decode(coords));
-  res.end();
+  // console.log(polyline.decode(coords));
+  // db.addRide(coords, polyline.decode(coords));
+  // res.end();
 });
 app.patch('/ride', (req, res) => {
   res.end();
