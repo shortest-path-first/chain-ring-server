@@ -47,12 +47,12 @@ app.get('/mapPolyline', (req, res) => {
 
 app.get('/userTotals', (req, res) => {
   console.log(req);
-  let object = {
-      avgSpeed: 20,
-      totalDistance:  100,
-      costSavings: 200,
-      stationaryTime: 800
-  }
+  const object = {
+    avgSpeed: 20,
+    totalDistance: 100,
+    costSavings: 200,
+    stationaryTime: 800,
+  };
   res.send(object);
 });
 
@@ -155,7 +155,7 @@ app.post('/ride', (req, res) => {
   // req.body contains pathpolyline, first and last points with timestamps
   console.log(req.body);
   res.statusCode = 201;
-  const coords = req.body.polyline;
+  const coords = req.body.pathPolyline;
   console.log(coords);
   console.log(polyline.decode(coords));
   db.addRide(coords, polyline.decode(coords));
