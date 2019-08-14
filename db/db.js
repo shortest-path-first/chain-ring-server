@@ -22,15 +22,14 @@ const addLocation = () => {
   Location.build({}).save();
 };
 
-const addUser = ({ username, userInfo }) => User.build({
-  name: username,
+const addUser = ({ userInfo }) => User.build({
   googleId: Number(userInfo.sub),
   avgSpeedCount: 0,
 }).save();
 
-const getUser = username => User.findAll({
+const getUser = googleId => User.findAll({
   where: {
-    name: username,
+    googleId,
   },
 });
 
@@ -102,10 +101,10 @@ const updateUser = ({
   }
 };
 
-const addRide = ({ username, lineString, routeTime }, coords, res) => {
+const addRide = ({ googleId, lineString, routeTime }, coords, res) => {
   User.findAll({
     where: {
-      name: username,
+      googleId,
     },
   }).then((users) => {
     const user = users[0];
@@ -119,7 +118,7 @@ const addRide = ({ username, lineString, routeTime }, coords, res) => {
       endLon: coords[coords.length - 1][1],
     }).save();
   });
-  addStat({ lineString, username }, res);
+  addStat({ lineString, googleId }, res);
 };
 
 const addRoute = () => {
@@ -127,11 +126,11 @@ const addRoute = () => {
 };
 
 const addStat = ({
-  username,
+  googleId,
   lineString,
 }, res) => User.findAll({
   where: {
-    name: username,
+    name: googleId,
   },
 }).then((users) => {
   console.log(users);
@@ -202,9 +201,9 @@ const addStat = ({
     }, res);
   });
 
-const getStat = username => User.findAll({
+const getStat = googleId => User.findAll({
   where: {
-    name: username,
+    name: googleId,
   },
 })
   .then((users) => {
