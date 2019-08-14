@@ -35,8 +35,7 @@ app.get('/mapPolyline', (req, res) => {
   //   .then((response) => {
   //     const polyLine = response.data.routes[0].overview_polyline.points;
   //     const turnByTurn = response.routes[0].legs[0].steps.map((step) => {
-  //       return [step.distance.text, step.duration.text, step.html_instructions.replace(/<b>/g, '').replace(/<\/b>/g, '').replace(/<div style="font-size:0.9em">/g, ' ').replace(/<\/div>/g, '')];
-  //     });
+  //     return [`${step.html_instructions.replace(/<b>/g, "").replace(/<\/b>/g, "").replace(/<div style="font-size:0.9em">/g, ' ').replace(/<\/div>/g, '')}`, `for ${step.distance.text}/${step.duration.text}`];  //     });
   //     res.send({ polyLine, turnByTurn });
   //   });
   //   .catch((err) => {
@@ -44,20 +43,20 @@ app.get('/mapPolyline', (req, res) => {
   //   });
   // test data below
   const polyLine = 'ca~uDzxxdPtAb@xAaC~CeFhD}FtDcGdGyJbA_Bl@s@b@u@~@aB|DoGbJiOBEzAeC~BqDhFyI~DoG~DuGvCaFjBuCpBeDlB`BvCnCxChCvMdLlD|CfIdHhC|BtFrElGrFZXtChBVHtB`@pAoENW`AmDXaAvCl@`B\\bLvB`FdAxKvBdKrB`Ez@z@PpGlAlj@zKv@LdD_ExBeClL}Mt@{@pA{AbD~DfAbAhBdBl@fA';
-  const turnByTurn = [['131 ft', '1 min', 'Head south on N White St toward Esplanade Ave'],
-    ['0.5 mi', '3 mins', 'Turn left at the 1st cross street onto Esplanade Ave'],
-    ['0.4 mi', '1 min', 'Keep left to stay on Esplanade Ave'],
-    ['0.4 mi', '1 min', 'Turn right onto N Claiborne Ave'],
-    ['223 ft', '1 min', 'Turn right onto Orleans Ave'],
-    ['1.1 mi', '2 mins', 'Turn right to merge onto I-10 W'],
-    ['0.4 mi', '1 min', 'Take the U.S. 90 business W exit on the left toward Westbank/Claiborne Avenue'],
-    ['1.2 mi', '2 mins', 'Keep left and merge onto US-90 BUS W'],
-    ['0.3 mi', '1 min', 'Take exit 11 toward Tchoupitoulas St/S Peters St'],
-    ['0.1 mi', '1 min', 'Merge onto Calliope St'],
-    ['0.3 mi', '1 min', 'Turn right onto Tchoupitoulas St'],
-    ['0.4 mi', '1 min', 'Continue straight onto Religious St'],
-    ['92 ft', '1 min', 'Turn right onto Felicity St'],
-    ['0.2 mi', '1 min', 'Turn left onto Rousseau St Destination will be on the left']];
+  const turnByTurn = [['Head south on N White St toward Esplanade Ave', 'for 131 ft/1 min'],
+    ['Turn left at the 1st cross street onto Esplanade Ave', 'for 0.5 mi/3 mins'],
+    ['Keep left to stay on Esplanade Ave', 'for 0.4 mi/1 min'],
+    ['Turn right onto N Claiborne Ave', 'for 0.4 mi/1 min'],
+    ['Turn right onto Orleans Ave', 'for 223 ft/1 min'],
+    ['Turn right to merge onto I-10 W', 'for 1.1 mi/2 mins'],
+    ['Take the U.S. 90 business W exit on the left toward Westbank/Claiborne Avenue', 'for 0.4 mi/1 min'],
+    ['Keep left and merge onto US-90 BUS W', 'for 1.2 mi/2 mins'],
+    ['Take exit 11 toward Tchoupitoulas St/S Peters St', 'for 0.3 mi/1 min'],
+    ['Merge onto Calliope St', 'for 0.1 mi/1 min'],
+    ['Turn right onto Tchoupitoulas St', 'for 0.3 mi/1 min'],
+    ['Continue straight onto Religious St', 'for 0.4 mi/1 min'],
+    ['Turn right onto Felicity St', 'for 92 ft/1 min'],
+    ['Turn left onto Rousseau St Destination will be on the left', 'for 0.2 mi/1 min']];
   console.log(place, userLoc);
   res.send({ polyLine, turnByTurn });
 });
