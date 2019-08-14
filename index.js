@@ -13,20 +13,20 @@ app.use(express.json());
 const port = process.env.PORT || 3000;
 
 app.get('/mapSearch', (req, res) => {
-  const {
-    place, userLoc,
-  } = req.query;
-  axios.get(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${userLoc}&radius=8000&keyword=${place}&key=AIzaSyAm0rv3w8tQUIPbjDkQyGhQUsK5rAxfBUs`)
-    .then((response) => {
-      const filteredResults = response.data.results.map(obj => [obj.geometry.location, obj.name, obj.vicinity]);
-      res.send(filteredResults);
-    })
-    .catch((err) => {
-      res.send(err);
-    });
+  // const {
+  //   place, userLoc,
+  // } = req.query;
+  // axios.get(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${userLoc}&radius=8000&keyword=${place}&key=AIzaSyAm0rv3w8tQUIPbjDkQyGhQUsK5rAxfBUs`)
+  //   .then((response) => {
+  //     const filteredResults = response.data.results.map(obj => [obj.geometry.location, obj.name, obj.vicinity]);
+  //     res.send(filteredResults);
+  //   })
+  //   .catch((err) => {
+  //     res.send(err);
+  //   });
   // test data below
-  // const filteredResults = info.data.results.map(obj => [obj.geometry.location, obj.name, obj.vicinity]);
-  // res.send(filteredResults);
+  const filteredResults = info.data.results.map(obj => [obj.geometry.location, obj.name, obj.vicinity]);
+  res.send(filteredResults);
 });
 
 app.get('/mapPolyline', (req, res) => {
@@ -92,7 +92,6 @@ app.post('/userInfo', (req, res) => {
     .catch((err) => {
       console.error(err);
     });
-  res.end('Imformatino recieved');
 });
 app.patch('/user', (req, res) => {
   const {
