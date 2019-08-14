@@ -14,16 +14,16 @@ const port = process.env.PORT || 3000;
 
 app.get('/mapSearch', (req, res) => {
   const {
-    place, userLoc
+    place, userLoc,
   } = req.query;
   axios.get(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${userLoc}&radius=8000&keyword=${place}&key=AIzaSyAm0rv3w8tQUIPbjDkQyGhQUsK5rAxfBUs`)
-  .then((response)=> {
-    const filteredResults = response.data.results.map(obj => [obj.geometry.location, obj.name, obj.vicinity]);
-    res.send(filteredResults);
-  })
-  .catch((err) =>{
-    res.send(err);
-  })
+    .then((response) => {
+      const filteredResults = response.data.results.map(obj => [obj.geometry.location, obj.name, obj.vicinity]);
+      res.send(filteredResults);
+    })
+    .catch((err) => {
+      res.send(err);
+    });
   // test data below
   // const filteredResults = info.data.results.map(obj => [obj.geometry.location, obj.name, obj.vicinity]);
   // res.send(filteredResults);
@@ -50,7 +50,7 @@ app.get('/userTotals', (req, res) => {
   console.log(req);
   const object = {
     avgSpeed: 20,
-    totalDistance:  100,
+    totalDistance: 100,
     costSavings: 200,
     stationaryTime: 800,
   };
