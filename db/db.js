@@ -22,8 +22,9 @@ const addLocation = () => {
   Location.build({}).save();
 };
 
-const addUser = username => User.build({
+const addUser = ({ username, userInfo }) => User.build({
   name: username,
+  googleId: Number(userInfo.sub),
   avgSpeedCount: 0,
 }).save();
 
