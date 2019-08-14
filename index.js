@@ -5,6 +5,7 @@ const db = require('./db/db');
 const {
   info,
 } = require('./data');
+const auth = require('./auth/index');
 
 
 const app = express();
@@ -51,12 +52,12 @@ app.get('/mapPolyline', (req, res) => {
 
 app.get('/userTotals', (req, res) => {
   console.log(req);
-  let object = {
-      avgSpeed: 20,
-      totalDistance:  100,
-      costSavings: 200,
-      stationaryTime: 800
-  }
+  const object = {
+    avgSpeed: 20,
+    totalDistance:  100,
+    costSavings: 200,
+    stationaryTime: 800,
+  };
   res.send(object);
 });
 
@@ -75,16 +76,27 @@ app.get('/user/:username', (req, res) => {
       res.end('Something Went Wrong');
     });
 });
-app.post('/user', (req, res) => {
+app.post('/userInfo', (req, res) => {
   console.log(req.body);
   const {
-    username,
+    accesstoken,
+    idToken,
   } = req.body;
-  db.addUser(username)
-    .then(() => {
-      res.statusCode = 201;
-      res.end('User Added');
+  auth(idToken)
+    .then((userInfo) => {
+      db.addUser({
+        userInfo,
+      })
+        .then(() => {
+          res.statusCode = 201;
+          res.end('User Added');
+        });
+      console.log(userInfo);
+    })
+    .catch((err) => {
+      console.error(err);
     });
+  res.end('Imformatino recieved');
 });
 app.patch('/user', (req, res) => {
   const {
