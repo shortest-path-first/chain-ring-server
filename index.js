@@ -13,28 +13,26 @@ app.use(express.json());
 const port = process.env.PORT || 3000;
 
 app.get('/mapSearch', (req, res) => {
-  // const {
-  //   place,
-  // } = req.query;
-  // axios.get(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=30, -90&radius=8000&keyword=${place}&key=AIzaSyAm0rv3w8tQUIPbjDkQyGhQUsK5rAxfBUs`)
-  // .then((response)=> {
-  //   console.log(response);
-  //   res.send(response.data);
-  // })
-  // .catch((err) =>{
-  //   res.send(err);
-  // })
-  const filteredResults = info.results.map(obj => [obj.geometry.location, obj.name, obj.vicinity]);
-  res.send(filteredResults);
+  const {
+    place, userLoc
+  } = req.query;
+  axios.get(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${userLoc}&radius=8000&keyword=${place}&key=AIzaSyAm0rv3w8tQUIPbjDkQyGhQUsK5rAxfBUs`)
+  .then((response)=> {
+    const filteredResults = response.data.results.map(obj => [obj.geometry.location, obj.name, obj.vicinity]);
+    res.send(filteredResults);
+  })
+  .catch((err) =>{
+    res.send(err);
+  })
+  // test data below
+  // const filteredResults = info.data.results.map(obj => [obj.geometry.location, obj.name, obj.vicinity]);
+  // res.send(filteredResults);
 });
 
 app.get('/mapPolyline', (req, res) => {
   // need to pass in location dynamically
-
-  const {
-    place,
-  } = req.query;
-  // axios.get(`https://maps.googleapis.com/maps/api/directions/json?origin=29.977830, -90.079930&destination=${place}&key=AIzaSyAm0rv3w8tQUIPbjDkQyGhQUsK5rAxfBUs&mode=bicycling`)
+  const { place, userLoc } = req.query;
+  // axios.get(`https://maps.googleapis.com/maps/api/directions/json?origin=${userLoc}&destination=${place}&key=AIzaSyAm0rv3w8tQUIPbjDkQyGhQUsK5rAxfBUs&mode=bicycling`)
   //   .then((response)=> {
   //     let polyLine = response.data.routes[0].overview_polyline.points
   //     res.send({polyLine});
@@ -42,12 +40,10 @@ app.get('/mapPolyline', (req, res) => {
   //   .catch((err) =>{
   //     res.send(err);
   //   });
-
+  // test data below
   const polyLine = 'ca~uDzxxdPtAb@xAaC~CeFhD}FtDcGdGyJbA_Bl@s@b@u@~@aB|DoGbJiOBEzAeC~BqDhFyI~DoG~DuGvCaFjBuCpBeDlB`BvCnCxChCvMdLlD|CfIdHhC|BtFrElGrFZXtChBVHtB`@pAoENW`AmDXaAvCl@`B\\bLvB`FdAxKvBdKrB`Ez@z@PpGlAlj@zKv@LdD_ExBeClL}Mt@{@pA{AbD~DfAbAhBdBl@fA';
   console.log(place);
-  res.send({
-    polyLine,
-  });
+  res.send({ polyLine });
 });
 
 app.get('/userTotals', (req, res) => {
