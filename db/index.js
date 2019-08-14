@@ -13,6 +13,9 @@ const User = sequelize.define('user', {
     type: Sequelize.STRING,
     unique: true,
   },
+  googleId: {
+    type: Sequelize.INTEGER(30),
+  },
   avgSpeed: {
     type: Sequelize.FLOAT(11),
   },
