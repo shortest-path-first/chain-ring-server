@@ -22,19 +22,19 @@ const addLocation = () => {
   Location.build({}).save();
 };
 
-const addUser = ({ userInfo }) => User.build({
-  googleId: Number(userInfo.sub),
+const addUser = ({ googleId }) => User.build({
+  googleId,
   avgSpeedCount: 0,
 }).save();
 
-const getUser = googleId => User.findAll({
+const getUser = ({ googleId }) => User.findAll({
   where: {
     googleId,
   },
 });
 
 const updateUser = ({
-  name,
+  googleId,
   speed,
   distance,
   savings,
@@ -43,7 +43,7 @@ const updateUser = ({
   if (speed !== undefined) {
     User.findAll({
       where: {
-        name,
+        googleId,
       },
     })
       .then((users) => {
@@ -66,7 +66,7 @@ const updateUser = ({
   if (distance !== undefined) {
     User.findAll({
       where: {
-        name,
+        googleId,
       },
     })
       .then((users) => {
@@ -84,7 +84,7 @@ const updateUser = ({
   if (savings !== undefined) {
     User.findAll({
       where: {
-        name,
+        googleId,
       },
     })
       .then((users) => {
@@ -130,7 +130,7 @@ const addStat = ({
   lineString,
 }, res) => User.findAll({
   where: {
-    name: googleId,
+    googleId,
   },
 }).then((users) => {
   console.log(users);
@@ -194,7 +194,7 @@ const addStat = ({
       // stationaryTime: ,
     }).save();
     updateUser({
-      name: user.name,
+      id: user.id,
       distance,
       speed: avgSpeed,
       savings,
@@ -203,7 +203,7 @@ const addStat = ({
 
 const getStat = googleId => User.findAll({
   where: {
-    name: googleId,
+    googleId,
   },
 })
   .then((users) => {
