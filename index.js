@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 const express = require('express');
 const axios = require('axios');
 const polyline = require('google-polyline');
@@ -12,37 +13,54 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 
 app.get('/mapSearch', (req, res) => {
-  // const {
-  //   place,
-  // } = req.query;
-  // axios.get(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=30, -90&radius=8000&keyword=${place}&key=AIzaSyAm0rv3w8tQUIPbjDkQyGhQUsK5rAxfBUs`)
-  // .then((response)=> {
-  //   console.log(response);
-  //   res.send(response.data);
-  // })
-  // .catch((err) =>{
-  //   res.send(err);
-  // })
+  const {
+    place, userLoc,
+  } = req.query;
+  console.log(place, userLoc);
+  // axios.get(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${userLoc}&radius=8000&keyword=${place}&key=AIzaSyAm0rv3w8tQUIPbjDkQyGhQUsK5rAxfBUs`)
+  //   .then((response) => {
+  //     const filteredResults = response.data.results.map(obj => [obj.geometry.location, obj.name, obj.vicinity]);
+  //     res.send(filteredResults);
+  //   })
+  //   .catch((err) => {
+  //     res.send(err);
+  //   });
+  // test data below
   const filteredResults = info.results.map(obj => [obj.geometry.location, obj.name, obj.vicinity]);
   res.send(filteredResults);
 });
 
 app.get('/mapPolyline', (req, res) => {
   // need to pass in location dynamically
-
-  const { place } = req.query;
-  // axios.get(`https://maps.googleapis.com/maps/api/directions/json?origin=29.977830, -90.079930&destination=${place}&key=AIzaSyAm0rv3w8tQUIPbjDkQyGhQUsK5rAxfBUs&mode=bicycling`)
-  //   .then((response)=> {
-  //     let polyLine = response.data.routes[0].overview_polyline.points
-  //     res.send({polyLine});
-  //   })
-  //   .catch((err) =>{
+  const { place, userLoc } = req.query;
+  // axios.get(`https://maps.googleapis.com/maps/api/directions/json?origin=${userLoc}&destination=${place}&key=AIzaSyAm0rv3w8tQUIPbjDkQyGhQUsK5rAxfBUs&mode=bicycling`)
+  //   .then((response) => {
+  //     const polyLine = response.data.routes[0].overview_polyline.points;
+  //     const turnByTurn = response.routes[0].legs[0].steps.map((step) => {
+  //     return [`${step.html_instructions.replace(/<b>/g, "").replace(/<\/b>/g, "").replace(/<div style="font-size:0.9em">/g, ' ').replace(/<\/div>/g, '')}`, `for ${step.distance.text}/${step.duration.text}`];  //     });
+  //     res.send({ polyLine, turnByTurn });
+  //   });
+  //   .catch((err) => {
   //     res.send(err);
   //   });
-
+  // test data below
   const polyLine = 'ca~uDzxxdPtAb@xAaC~CeFhD}FtDcGdGyJbA_Bl@s@b@u@~@aB|DoGbJiOBEzAeC~BqDhFyI~DoG~DuGvCaFjBuCpBeDlB`BvCnCxChCvMdLlD|CfIdHhC|BtFrElGrFZXtChBVHtB`@pAoENW`AmDXaAvCl@`B\\bLvB`FdAxKvBdKrB`Ez@z@PpGlAlj@zKv@LdD_ExBeClL}Mt@{@pA{AbD~DfAbAhBdBl@fA';
-  console.log(place);
-  res.send({ polyLine });
+  const turnByTurn = [['Head south on N White St toward Esplanade Ave', 'for 131 ft/1 min'],
+    ['Turn left at the 1st cross street onto Esplanade Ave', 'for 0.5 mi/3 mins'],
+    ['Keep left to stay on Esplanade Ave', 'for 0.4 mi/1 min'],
+    ['Turn right onto N Claiborne Ave', 'for 0.4 mi/1 min'],
+    ['Turn right onto Orleans Ave', 'for 223 ft/1 min'],
+    ['Turn right to merge onto I-10 W', 'for 1.1 mi/2 mins'],
+    ['Take the U.S. 90 business W exit on the left toward Westbank/Claiborne Avenue', 'for 0.4 mi/1 min'],
+    ['Keep left and merge onto US-90 BUS W', 'for 1.2 mi/2 mins'],
+    ['Take exit 11 toward Tchoupitoulas St/S Peters St', 'for 0.3 mi/1 min'],
+    ['Merge onto Calliope St', 'for 0.1 mi/1 min'],
+    ['Turn right onto Tchoupitoulas St', 'for 0.3 mi/1 min'],
+    ['Continue straight onto Religious St', 'for 0.4 mi/1 min'],
+    ['Turn right onto Felicity St', 'for 92 ft/1 min'],
+    ['Turn left onto Rousseau St Destination will be on the left', 'for 0.2 mi/1 min']];
+  console.log(place, userLoc);
+  res.send({ polyLine, turnByTurn });
 });
 
 app.get('/userTotals', (req, res) => {
