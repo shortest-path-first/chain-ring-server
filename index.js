@@ -58,18 +58,21 @@ app.get('/userTotals', (req, res) => {
 });
 
 
-app.get('/user/:username', (req, res) => {
+app.get('/user/:idToken', (req, res) => {
   const {
-    username,
+    idToken,
   } = req.params;
-  db.getUser(username)
-    .then((users) => {
-      res.send(users[0]);
-    })
-    .catch((err) => {
-      console.log(err);
-      res.statusCode = (500);
-      res.end('Something Went Wrong');
+  auth(idToken)
+    .then((userInfo) => {
+      db.getUser(userInfo.sub)
+        .then((users) => {
+          res.send(users[0]);
+        })
+        .catch((err) => {
+          console.log(err);
+          res.statusCode = (500);
+          res.end('Something Went Wrong');
+        });
     });
 });
 app.post('/userInfo', (req, res) => {
@@ -80,8 +83,9 @@ app.post('/userInfo', (req, res) => {
   } = req.body;
   auth(idToken)
     .then((userInfo) => {
+      console.log(userInfo);
       db.addUser({
-        userInfo,
+        googleId: userInfo.sub,
       })
         .then(() => {
           res.statusCode = 201;
@@ -95,15 +99,18 @@ app.post('/userInfo', (req, res) => {
 });
 app.patch('/user', (req, res) => {
   const {
-    name,
+    idToken,
     speed,
     distance,
   } = req.body;
-  db.updateUser({
-    name,
-    speed,
-    distance,
-  }, res);
+  auth(idToken)
+    .then((userInfo) => {
+      db.updateUser({
+        googleId: userInfo.sub,
+        speed,
+        distance,
+      }, res);
+    });
 });
 
 app.get('/marker', (req, res) => {
