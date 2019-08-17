@@ -11,6 +11,11 @@ const sequelize = new Sequelize('chainring', 'root', '', {
 const User = sequelize.define('user', {
   name: {
     type: Sequelize.STRING,
+    unique: true,
+  },
+  googleId: {
+    type: Sequelize.STRING(30),
+    unique: true,
   },
   avgSpeed: {
     type: Sequelize.FLOAT(11),
