@@ -3,7 +3,10 @@ const express = require('express');
 const axios = require('axios');
 const polyline = require('google-polyline');
 const db = require('./db/db');
-const { info } = require('./data');
+const {
+  info,
+} = require('./data');
+const auth = require('./auth/index');
 
 
 const app = express();
@@ -22,10 +25,9 @@ app.get('/locations', (req, res) => {
 });
 
 app.get('/mapSearch', (req, res) => {
-  const {
-    place, userLoc,
-  } = req.query;
-  console.log(place, userLoc);
+  // const {
+  //   place, userLoc,
+  // } = req.query;
   // axios.get(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${userLoc}&radius=8000&keyword=${place}&key=AIzaSyAm0rv3w8tQUIPbjDkQyGhQUsK5rAxfBUs`)
   //   .then((response) => {
   //     const filteredResults = response.data.results.map(obj => [obj.geometry.location, obj.name, obj.vicinity]);
@@ -181,42 +183,59 @@ app.get('/userStats', (req, res) => {
 });
 
 
-app.get('/user/:username', (req, res) => {
+app.get('/user/:idToken', (req, res) => {
   const {
-    username,
+    idToken,
   } = req.params;
-  db.getUser(username)
-    .then((users) => {
-      res.send(users[0]);
-    })
-    .catch((err) => {
-      console.log(err);
-      res.statusCode = (500);
-      res.end('Something Went Wrong');
+  auth(idToken)
+    .then((userInfo) => {
+      db.getUser(userInfo.sub)
+        .then((users) => {
+          res.send(users[0]);
+        })
+        .catch((err) => {
+          console.log(err);
+          res.statusCode = (500);
+          res.end('Something Went Wrong');
+        });
     });
 });
-app.post('/user', (req, res) => {
+app.post('/userInfo', (req, res) => {
   console.log(req.body);
   const {
-    username,
+    accesstoken,
+    idToken,
   } = req.body;
-  db.addUser(username)
-    .then(() => {
-      res.statusCode = 201;
-      res.end('User Added');
+  auth(idToken)
+    .then((userInfo) => {
+      console.log(userInfo);
+      db.addUser({
+        googleId: userInfo.sub,
+      })
+        .then(() => {
+          res.statusCode = 201;
+          res.end('User Added');
+        });
+      console.log(userInfo);
+    })
+    .catch((err) => {
+      console.error(err);
     });
 });
 app.patch('/user', (req, res) => {
   const {
-    name,
+    idToken,
     speed,
     distance,
   } = req.body;
-  db.updateUser({
-    name,
-    speed,
-    distance,
-  }, res);
+  auth(idToken)
+    .then((userInfo) => {
+      db.updateUser({
+        googleId: userInfo.sub,
+        speed,
+        distance,
+      }, res);
+    });
 });
 
 app.get('/marker', (req, res) => {
@@ -239,19 +258,29 @@ app.patch('/location', (req, res) => {
   res.end();
 });
 
-app.get('/stat', (req, res) => {
-  db.getStat('Peter')
+app.get('/stat/:username', (req, res) => {
+  const {
+    username,
+  } = req.params;
+  db.getStat(username)
     .then((something) => {
       console.log(something);
+      res.send(something);
     });
-  res.end();
 });
 app.post('/stat', (req, res) => {
+  const {
+    username,
+    lineString,
+  } = req.body;
   // const coords = req.body.polyline;
   // console.log(coords);
   // console.log(polyline.decode(coords));
   // res.send(polyline.decode(coords));
-  db.addStat({ username: 'Peter', lineString: 'yd}uDhjsdPaBH@l@t@lZ|@r]ZpMDjDFl@IfAIRiB`AsElBaEpB{Ax@gAf@oB`AcBz@sFjCgLtF{G~CiB~@gAh@[TaBn@eAh@{BbAaHdD_EnBsAj@iCr@uAlAi@XgFdCaHhDiFdCaGrC}BfAcEjBmEvB{OnHs@^LlEl@jUFrB@`BExCOpBc@hCYhAa@dAgGjNIPUTOLa@PUDMHQ^?d@@F@F?j@CTCTMToDdIhE`C|@Xh@^p@Xx@L\\@h@Eb@U~@S' }, res);
+  db.addStat({
+    username,
+    lineString,
+  }, res);
 });
 app.patch('/stat', (req, res) => {
   res.end();
@@ -271,11 +300,24 @@ app.get('/ride', (req, res) => {
   res.end();
 });
 app.post('/ride', (req, res) => {
-  const coords = req.body.polyline;
+  const {
+    username,
+    lineString,
+    routeTime,
+  } = req.body;
+
+  const coords = polyline.decode(lineString);
+
+  db.addRide({
+    username,
+    lineString,
+    routeTime,
+  }, coords, res);
+
   console.log(coords);
-  console.log(polyline.decode(coords));
-  db.addRide(coords, polyline.decode(coords));
-  res.end();
+  // console.log(polyline.decode(coords));
+  // db.addRide(coords, polyline.decode(coords));
+  // res.end();
 });
 app.patch('/ride', (req, res) => {
   res.end();

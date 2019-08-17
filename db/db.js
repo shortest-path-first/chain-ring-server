@@ -1,4 +1,5 @@
 const polyline = require('google-polyline');
+const axios = require('axios');
 const {
   distanceTime,
 } = require('../data');
@@ -21,19 +22,19 @@ const addLocation = () => {
   Location.build({}).save();
 };
 
-const addUser = username => User.build({
-  name: username,
+const addUser = ({ googleId }) => User.build({
+  googleId,
   avgSpeedCount: 0,
 }).save();
 
-const getUser = username => User.findAll({
+const getUser = ({ googleId }) => User.findAll({
   where: {
-    name: username,
+    googleId,
   },
 });
 
 const updateUser = ({
-  name,
+  googleId,
   speed,
   distance,
   savings,
@@ -42,7 +43,7 @@ const updateUser = ({
   if (speed !== undefined) {
     User.findAll({
       where: {
-        name,
+        googleId,
       },
     })
       .then((users) => {
@@ -65,7 +66,7 @@ const updateUser = ({
   if (distance !== undefined) {
     User.findAll({
       where: {
-        name,
+        googleId,
       },
     })
       .then((users) => {
@@ -83,7 +84,7 @@ const updateUser = ({
   if (savings !== undefined) {
     User.findAll({
       where: {
-        name,
+        googleId,
       },
     })
       .then((users) => {
@@ -100,16 +101,24 @@ const updateUser = ({
   }
 };
 
-const addRide = (lineString, coords) => {
-  Ride.build({
-    userId: 2,
-    lineString,
-    routeTime: 15,
-    startLat: coords[0][0],
-    startLon: coords[0][1],
-    endLat: coords[coords.length - 1][0],
-    endLon: coords[coords.length - 1][1],
-  }).save();
+const addRide = ({ googleId, lineString, routeTime }, coords, res) => {
+  User.findAll({
+    where: {
+      googleId,
+    },
+  }).then((users) => {
+    const user = users[0];
+    Ride.build({
+      userId: user.id,
+      lineString,
+      routeTime,
+      startLat: coords[0][0],
+      startLon: coords[0][1],
+      endLat: coords[coords.length - 1][0],
+      endLon: coords[coords.length - 1][1],
+    }).save();
+  });
+  addStat({ lineString, googleId }, res);
 };
 
 const addRoute = () => {
@@ -117,11 +126,11 @@ const addRoute = () => {
 };
 
 const addStat = ({
-  username,
+  googleId,
   lineString,
 }, res) => User.findAll({
   where: {
-    name: username,
+    googleId,
   },
 }).then((users) => {
   console.log(users);
@@ -142,7 +151,34 @@ const addStat = ({
       return { ride: rides[0], user };
     }))
   .then(({ ride, user }) => {
-    // console.log(props);
+    // axios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=29.97341,-90.05237&destinations=enc:${lineString}:&key=${process.env.GOOGLE_KEY}&mode=bicycling`)
+    //   .then((rideInfo) => {
+    //     rideInfo
+    //     let {
+    //       distance,
+    //       duration
+    //     } = rideInfo.rows[rideInfo.rows.length - 1]
+    //       .elements[rideInfo.rows[rideInfo.rows.length - 1].elements.length - 1];
+    //     distance = Number(distance.text.match(/[1-9,.]/g).join(''));
+    //     duration = Number(duration.text.match(/[1-9]/g).join(''));
+    //     console.log(duration);
+    //     const avgSpeed = (distance) * (60 / duration);
+    //     const savings = distance * 2.660;
+    //     Stat.build({
+    //       userId: user.id,
+    //       rideId: ride.id,
+    //       avgSpeed,
+    //       costSavings: savings,
+    //       // stationaryTime: ,
+    //     }).save();
+    //     updateUser({
+    //       name: user.name,
+    //       distance,
+    //       speed: avgSpeed,
+    //       savings,
+    //     }, res);
+    //   });
+
     let { distance, duration } = distanceTime.rows[distanceTime.rows.length - 1]
       .elements[distanceTime.rows[distanceTime.rows.length - 1].elements.length - 1];
     distance = Number(distance.text.match(/[1-9,.]/g).join(''));
@@ -158,16 +194,16 @@ const addStat = ({
       // stationaryTime: ,
     }).save();
     updateUser({
-      name: user.name,
+      id: user.id,
       distance,
       speed: avgSpeed,
       savings,
     }, res);
   });
 
-const getStat = username => User.findAll({
+const getStat = googleId => User.findAll({
   where: {
-    name: username,
+    googleId,
   },
 })
   .then((users) => {
