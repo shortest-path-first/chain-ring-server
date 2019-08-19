@@ -29,6 +29,12 @@ const User = sequelize.define('user', {
   totalSavings: {
     type: Sequelize.FLOAT(11),
   },
+  loginToken: {
+    type: Sequelize.STRING,
+  },
+  loginStatus: {
+    type: Sequelize.BOOLEAN,
+  },
 },
 {
   timestamps: false,
