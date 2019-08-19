@@ -13,6 +13,8 @@ const app = express();
 app.use(express.json());
 const port = process.env.PORT || 3000;
 
+const usedTokens = [];
+
 app.get('/mapSearch', (req, res) => {
   // const {
   //   place, userLoc,
@@ -74,6 +76,35 @@ app.get('/userTotals', (req, res) => {
   res.send(object);
 });
 
+app.get('/login/:token', (req, res) => {
+  setTimeout(() => {
+    db.isLoggedIn(req.params.token)
+      .then((bool) => {
+        console.log(bool);
+        res.send({
+          bool,
+        });
+      })
+      .catch((error) => {
+        res.statusCode = 500;
+        res.send({
+          bool: false,
+        });
+      });
+  }, 200);
+});
+app.patch('/login/:token', (req, res) => {
+  db.login(req.body.token)
+    .then(() => {
+      res.send('User Logged In');
+    });
+});
+app.patch('/logout/:token', (req, res) => {
+  db.logout(req.params.token)
+    .then(() => {
+      res.send('User Logged Out');
+    });
+});
 
 app.get('/user/:idToken', (req, res) => {
   const {
@@ -101,17 +132,49 @@ app.post('/userInfo', (req, res) => {
   auth(idToken)
     .then((userInfo) => {
       console.log(userInfo);
-      db.addUser({
+      db.getUser({
         googleId: userInfo.sub,
       })
-        .then(() => {
-          res.statusCode = 201;
-          res.end('User Added');
+        .then((users) => {
+          if (users[0] === undefined) {
+            const makeId = () => {
+              let result = '';
+              const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+              const charactersLength = characters.length;
+              const length = Math.random() * (250 - 150) + 150;
+              for (let i = 0; i < length; i++) {
+                result += characters.charAt(Math.floor(Math.random() * charactersLength));
+              }
+              if (usedTokens.includes(result)) {
+                return makeId();
+              }
+              return result;
+            };
+            const token = makeId();
+            db.addUser({
+              googleId: userInfo.sub,
+              token,
+            })
+              .then(() => {
+                res.statusCode = 201;
+                res.send({ token });
+              });
+            console.log(userInfo);
+          } else {
+            const {
+              loginToken,
+            } = users[0];
+
+            res.send({
+              loginToken,
+            });
+          }
         });
-      console.log(userInfo);
     })
     .catch((err) => {
       console.error(err);
+      res.statusCode = 500;
+      res.end('Something went Wrong');
     });
 });
 app.patch('/user', (req, res) => {
