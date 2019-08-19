@@ -13,6 +13,12 @@ const app = express();
 app.use(express.json());
 const port = process.env.PORT || 3000;
 
+app.all('/', (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'X-Requested-With');
+  next();
+});
+
 
 app.get('/locations', (req, res) => {
   const { userEmail } = req.query;
@@ -143,7 +149,7 @@ app.get('/userTotals', (req, res) => {
 
 app.get('/userStats', (req, res) => {
   console.log(req);
-  const recentRides = [{ 
+  const recentRides = [{
     avgSpeed: 10,
     totalDistance: 100,
     costSavings: 100,
