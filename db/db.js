@@ -22,9 +22,54 @@ const addLocation = () => {
   Location.build({}).save();
 };
 
-const addUser = ({ googleId }) => User.build({
+const isLoggedIn = token => User.findAll({
+  where: {
+    loginToken: token,
+  },
+})
+  .then((users) => {
+    console.log(users[0].loginStatus);
+    return users[0].loginStatus;
+  })
+  .catch((err) => {
+    console.error(err);
+    return false;
+  });
+
+const login = token => User.findAll({
+  where: {
+    loginToken: token,
+  },
+})
+  .then((users) => {
+    const user = users[0];
+    if (user.loginStatus === false) {
+      user.update({
+        loginStatus: true,
+      });
+    }
+  });
+
+const logout = token => User.findAll({
+  where: {
+    loginToken: token,
+  },
+})
+  .then((users) => {
+    const user = users[0];
+    if (user.loginStatus === true) {
+      user.update({
+        loginStatus: false,
+      });
+    }
+  });
+
+
+const addUser = ({ googleId, token }) => User.build({
   googleId,
   avgSpeedCount: 0,
+  loginToken: token,
+  loginStatus: true,
 }).save();
 
 const getUser = ({ googleId }) => User.findAll({
@@ -228,4 +273,7 @@ module.exports = {
   addUser,
   updateUser,
   getUser,
+  isLoggedIn,
+  login,
+  logout,
 };
