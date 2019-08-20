@@ -69,7 +69,7 @@ const addUser = ({ googleId, token }) => User.build({
   googleId,
   avgSpeedCount: 0,
   loginToken: token,
-  loginStatus: false,
+  loginStatus: true,
 }).save();
 
 const getUser = ({ googleId }) => User.findAll({
