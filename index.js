@@ -55,11 +55,13 @@ app.get('/mapPolyline', (req, res) => {
   const { place, userLoc } = req.query;
   axios.get(`https://maps.googleapis.com/maps/api/directions/json?origin=${userLoc}&destination=${place}&key=AIzaSyAm0rv3w8tQUIPbjDkQyGhQUsK5rAxfBUs&mode=bicycling`)
     .then((response) => {
+      console.log(response.data);
       const polyLine = response.data.routes[0].overview_polyline.points;
-      const turnByTurn = response.routes[0].legs[0].steps.map(step => [`${step.html_instructions.replace(/<b>/g, '').replace(/<\/b>/g, '').replace(/<div style="font-size:0.9em">/g, ' ').replace(/<\/div>/g, '')}`, `for ${step.distance.text}/${step.duration.text}`]);
-      const peterDistance = response.routes[0].legs[0].steps.map(step => step.distance.text);
-      const peterHTML = response.routes[0].legs[0].steps.map(step => `${step.html_instructions.replace(/<b>/g, '').replace(/<\/b>/g, '').replace(/<div style="font-size:0.9em">/g, ' ').replace(/<\/div>/g, '')}`);
-      const peterEndLoc = response.routes[0].legs[0].steps.map(step => step.end_location);
+      const turnByTurn = response.data.routes[0].legs[0].steps.map(step => [`${step.html_instructions.replace(/<b>/g, '').replace(/<\/b>/g, '').replace(/<div style="font-size:0.9em">/g, ' ').replace(/<\/div>/g, '')}`, `for ${step.distance.text}/${step.duration.text}`]);
+      const peterDistance = response.data.routes[0].legs[0].steps.map(step => step.distance.text);
+      const peterHTML = response.data.routes[0].legs[0].steps.map(step => `${step.html_instructions.replace(/<b>/g, '').replace(/<\/b>/g, '').replace(/<div style="font-size:0.9em">/g, ' ').replace(/<\/div>/g, '')}`);
+      const peterEndLoc = response.data.routes[0].legs[0].steps.map(step => step.end_location);
+      console.log(polyLine, turnByTurn, peterDistance, peterHTML, peterEndLoc);
       res.send({
         polyLine, turnByTurn, peterDistance, peterHTML, peterEndLoc,
       });
