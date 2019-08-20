@@ -91,7 +91,7 @@ app.get('/login/:token', (req, res) => {
           bool: false,
         });
       });
-  }, 200);
+  }, 400);
 });
 app.patch('/login/:token', (req, res) => {
   db.login(req.body.token)
