@@ -9,7 +9,6 @@ const {
 } = require('./data');
 const auth = require('./auth/index');
 
-
 const app = express();
 app.use(express.json());
 const port = process.env.PORT || 3000;
@@ -353,7 +352,8 @@ app.patch('/stat', (req, res) => {
 });
 
 app.get('/route', (req, res) => {
-  res.end();
+  res.end();ls
+
 });
 app.post('/route', (req, res) => {
   res.end();
