@@ -36,6 +36,7 @@ app.get('/mapSearch', (req, res) => {
   const {
     place, userLoc,
   } = req.query;
+  console.log(req.query);
   axios.get(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${userLoc}&radius=8000&keyword=${place}&key=AIzaSyAm0rv3w8tQUIPbjDkQyGhQUsK5rAxfBUs`)
     .then((response) => {
       const filteredResults = response.data.results.map(obj => [obj.geometry.location, obj.name, obj.vicinity]);
@@ -145,6 +146,7 @@ app.get('/userTotals', (req, res) => {
 });
 
 app.get('/login/:token', (req, res) => {
+  console.log(req);
   setTimeout(() => {
     db.isLoggedIn(req.params.token)
       .then((bool) => {
