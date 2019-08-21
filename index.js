@@ -1,8 +1,33 @@
+
 /* eslint-disable no-plusplus */
 /* eslint-disable max-len */
+const turf = require('@turf/turf');
+
 const express = require('express');
 const axios = require('axios');
 const polyline = require('google-polyline');
+const PathFinder = require('geojson-path-finder');
+const { point } = require('@turf/helpers');
+const geojsonPick = require('geojson-pick');
+const geojson = require('./db/Bike_Lanes.json');
+
+const newGeoJson = geojsonPick.pickProperties(geojson, { type: 'Feature', properties: { type: 'LineString' } });
+
+const lineStrings = [];
+// console.log(newGeoJson.features[0].geometry);
+for (let i = 0; i < newGeoJson.features.length; i++) {
+  newGeoJson.features[i].geometry.coordinates.forEach((line) => {
+    if (typeof line[0] === 'number') {
+      lineStrings.push(line);
+    }
+  });
+}
+
+// const position = turf.point([29.9778299, -90.0801842]);
+const actualLineStrings = turf.lineString(lineStrings);
+// const nearest = turf.nearestPointOnLine(actualLineStrings, position);
+
+const pathFinder = new PathFinder(geojson);
 const db = require('./db/db');
 const {
   info,
@@ -25,7 +50,7 @@ app.get('/locations', (req, res) => {
   const { userEmail } = req.query;
   console.log(userEmail);
   const locations = [{ lat: 29.955727, lng: -90.120515, label: "Cane's Chicken Fingers" },
-    { lat: 298544655, lng: -90.055455, label: 'Home' },
+    { lat: 29.8544655, lng: -90.055455, label: 'Home' },
     { lat: 29.951965, lng: -90.070227, label: 'Work' },
     { lat: 29.9624226, lng: -90.042877, label: 'Pizza Delicious' }];
   res.send(locations);
@@ -37,6 +62,13 @@ app.get('/mapSearch', (req, res) => {
     place, userLoc,
   } = req.query;
   console.log(req.query);
+  // const start = point([-90.02214728035479, 29.94667034768392]);
+  // const end = point([-90.03611454277258, 29.952934855421955]);
+  // let end = { coordinates: [29.973306, -90.052311] };
+  // console.log(turf.nearestPointOnLine(, start));
+  // const path = pathFinder.findPath(start, end);
+
+  // console.log('Path:', path);
   axios.get(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${userLoc}&radius=8000&keyword=${place}&key=AIzaSyAm0rv3w8tQUIPbjDkQyGhQUsK5rAxfBUs`)
     .then((response) => {
       const filteredResults = response.data.results.map(obj => [obj.geometry.location, obj.name, obj.vicinity]);
@@ -52,28 +84,55 @@ app.get('/mapSearch', (req, res) => {
 
 app.get('/mapPolyline', (req, res) => {
   // need to pass in location dynamically
-  const { place, userLoc } = req.query;
-  axios.get(`https://maps.googleapis.com/maps/api/directions/json?origin=${userLoc}&destination=${place}&key=AIzaSyAm0rv3w8tQUIPbjDkQyGhQUsK5rAxfBUs&mode=bicycling`)
-    .then((response) => {
-      console.log(response.data);
-      const polyLine = response.data.routes[0].overview_polyline.points;
-      const turnByTurn = response.data.routes[0].legs[0].steps.map(step => [`${step.html_instructions.replace(/<b>/g, '').replace(/<\/b>/g, '').replace(/<div style="font-size:0.9em">/g, ' ').replace(/<\/div>/g, '')}`, `for ${step.distance.text}/${step.duration.text}`]);
-      const peterDistance = response.data.routes[0].legs[0].steps.map(step => step.distance.text);
-      const peterHTML = response.data.routes[0].legs[0].steps.map(step => `${step.html_instructions.replace(/<b>/g, '').replace(/<\/b>/g, '').replace(/<div style="font-size:0.9em">/g, ' ').replace(/<\/div>/g, '')}`);
-      const peterEndLoc = response.data.routes[0].legs[0].steps.map(step => step.end_location);
-      console.log(polyLine, turnByTurn, peterDistance, peterHTML, peterEndLoc);
-      res.send({
-        polyLine, turnByTurn, peterDistance, peterHTML, peterEndLoc,
+  const { place, userLoc, wayPoint } = req.query;
+  // console.log(req.query);
+  let commaIndex = userLoc.indexOf(',');
+  const startLat = userLoc.slice(0, commaIndex);
+  const startLng = userLoc.slice(commaIndex + 1);
+  console.log(startLng); 
+  commaIndex = place.indexOf(',');
+  const endLat = place.slice(0, commaIndex);
+  const endLng = place.slice(commaIndex + 1);
+  // console.log(userLoc, place);
+  console.log(Number(startLat), Number(startLng), Number(endLat), Number(endLng));
+  const start = turf.point([Number(startLat), Number(startLng)]);
+  const end = turf.point([Number(endLat), Number(endLng)]);
+  const nearestToStart = turf.nearestPointOnLine(actualLineStrings, start);
+  const nearestToEnd = turf.nearestPointOnLine(actualLineStrings, end);
+  console.log('Nearest:', nearestToStart, nearestToEnd);
+  // let end = { coordinates: [29.973306, -90.052311] };
+  // console.log(turf.nearestPointOnLine(, start));
+  // const path = pathFinder.findPath(start, end);
+  // const path = pathFinder.findPath(userLoc, wayPoint);
+  // console.log('Path:', path);
+  if (!wayPoint) {
+    axios.get(`https://maps.googleapis.com/maps/api/directions/json?origin=${userLoc}&destination=${place}&key=AIzaSyAm0rv3w8tQUIPbjDkQyGhQUsK5rAxfBUs&mode=bicycling`)
+      .then((response) => {
+        // console.log(response.data);
+        const polyLine = response.data.routes[0].overview_polyline.points;
+        const turnByTurn = response.data.routes[0].legs[0].steps.map(step => [`${step.html_instructions.replace(/<b>/g, '').replace(/<\/b>/g, '').replace(/<div style="font-size:0.9em">/g, ' ').replace(/<\/div>/g, '')}`, `for ${step.distance.text}/${step.duration.text}`]);
+        const peterRide = response.data.routes[0].legs[0].steps;
+        console.log(polyLine, turnByTurn, peterRide);
+        res.send({
+          polyLine, turnByTurn, peterRide,
+        });
+      })
+      .catch((err) => {
+        res.send(err);
       });
-    })
-    .catch((err) => {
-      res.send(err);
-    });
+  } else if (wayPoint) {
+    // const path = pathFinder.findPath(userLoc, place);
+    // console.log(path);
+    // axios.get(`https://maps.googleapis.com/maps/api/directions/json?origin=${userLoc}&destination=${place}&key=AIzaSyAm0rv3w8tQUIPbjDkQyGhQUsK5rAxfBUs&mode=bicycling&waypoints=[${wayPoint}]`)
+    //   .then((response) => {
+    //     console.log(response.data);
+    //   });
+  }
   // test data below
   // const polyLine = 'ca~uDzxxdPtAb@xAaC~CeFhD}FtDcGdGyJbA_Bl@s@b@u@~@aB|DoGbJiOBEzAeC~BqDhFyI~DoG~DuGvCaFjBuCpBeDlB`BvCnCxChCvMdLlD|CfIdHhC|BtFrElGrFZXtChBVHtB`@pAoENW`AmDXaAvCl@`B\\bLvB`FdAxKvBdKrB`Ez@z@PpGlAlj@zKv@LdD_ExBeClL}Mt@{@pA{AbD~DfAbAhBdBl@fA';
   // const turnByTurn = [['Head south on N White St toward Esplanade Ave', 'for 131 ft/1 min'],
-  // ['Turn left at the 1st cross street onto Esplanade Ave', 'for 0.5 mi/3 mins'],
-  // ['Keep left to stay on Esplanade Ave', 'for 0.4 mi/1 min'],
+  //   ['Turn left at the 1st cross street onto Esplanade Ave', 'for 0.5 mi/3 mins'],
+  //   ['Keep left to stay on Esplanade Ave', 'for 0.4 mi/1 min'],
   //   ['Turn right onto N Claiborne Ave', 'for 0.4 mi/1 min'],
   //   ['Turn right onto Orleans Ave', 'for 223 ft/1 min'],
   //   ['Turn right to merge onto I-10 W', 'for 1.1 mi/2 mins'],
@@ -85,51 +144,124 @@ app.get('/mapPolyline', (req, res) => {
   //   ['Continue straight onto Religious St', 'for 0.4 mi/1 min'],
   //   ['Turn right onto Felicity St', 'for 92 ft/1 min'],
   //   ['Turn left onto Rousseau St Destination will be on the left', 'for 0.2 mi/1 min']];
-  // const peterHTML = ['Head south on N White St toward Esplanade Ave',
-  //   'Turn left at the 1st cross street onto Esplanade Ave',
-  //   'Keep left to stay on Esplanade Ave',
-  //   'Turn right onto N Claiborne Ave',
-  //   'Turn right onto Orleans Ave',
-  //   'Turn right to merge onto I-10 W',
-  //   'Take the U.S. 90 business W exit on the left toward Westbank/Claiborne Avenue',
-  //   'Keep left and merge onto US-90 BUS W',
-  //   'Take exit 11 toward Tchoupitoulas St/S Peters St',
-  //   'Merge onto Calliope St',
-  //   'Turn right onto Tchoupitoulas St',
-  //   'Continue straight onto Religious St',
-  //   'Turn right onto Felicity St',
-  //   'Turn left onto Rousseau St Destination will be on the left'];
-  // const peterDistance = ['131 ft',
-  //   '0.5 mi',
-  //   '0.4 mi',
-  //   '0.4 mi',
-  //   '223 ft',
-  //   '1.1 mi',
-  //   '0.4 mi',
-  //   '1.2 mi',
-  //   '0.3 mi',
-  //   '0.1 mi',
-  //   '0.3 mi',
-  //   '0.4 mi',
-  //   '92 ft',
-  //   '0.2 mi'];
-  // const peterEndLoc = [{ lat: 29.9776004, lng: -90.0804337 },
-  //   { lat: 29.9726067, lng: -90.0734555 },
-  //   { lat: 29.96945, lng: -90.068823 },
-  //   { lat: 29.9644667, lng: -90.07329279999999 },
-  //   { lat: 29.9648359, lng: -90.07386059999999 },
-  //   { lat: 29.9550818, lng: -90.0819113 },
-  //   { lat: 29.9522188, lng: -90.0868912 },
-  //   { lat: 29.9413938, lng: -90.07214610000001 },
-  //   { lat: 29.9390935, lng: -90.0684299 },
-  //   { lat: 29.9380873, lng: -90.06677930000001 },
-  //   { lat: 29.93403859999999, lng: -90.0663225 },
-  //   { lat: 29.9277401, lng: -90.06810829999999 },
-  //   { lat: 29.9279172, lng: -90.06831419999999 },
-  //   { lat: 29.9259759, lng: -90.0704787 }];
-  // console.log(place, userLoc);
+
+  // const peterRide = [{
+  //   distance: { text: '151 ft', value: 46 },
+  //   duration: { text: '1 min', value: 8 },
+  //   end_location: { lat: 29.9514906, lng: -90.0700335 },
+  //   html_instructions:
+  //     'Head <b>south</b> on <b>St Charles Ave</b> toward <b>Gravier St</b>',
+  //   polyline: { points: 'i~xuD|wvdPnAV' },
+  //   start_location: { lat: 29.9518948, lng: -90.0699131 },
+  //   travel_mode: 'BICYCLING',
+  // },
+  // {
+  //   distance: { text: '410 ft', value: 125 },
+  //   duration: { text: '1 min', value: 23 },
+  //   end_location: { lat: 29.9510033, lng: -90.0688704 },
+  //   html_instructions: 'Turn <b>left</b> onto <b>Gravier St</b>',
+  //   maneuver: 'turn-left',
+  //   polyline: { points: 'y{xuDtxvdPpAkE?CBGJO' },
+  //   start_location: { lat: 29.9514906, lng: -90.0700335 },
+  //   travel_mode: 'BICYCLING',
+  // },
+  // {
+  //   distance: { text: '0.1 mi', value: 201 },
+  //   duration: { text: '1 min', value: 35 },
+  //   end_location: { lat: 29.9526685, lng: -90.06811239999999 },
+  //   html_instructions: 'Turn <b>left</b> onto <b>Camp St</b>',
+  //   maneuver: 'turn-left',
+  //   polyline: { points: 'wxxuDlqvdPgCk@_@IKEQGw@WOEKEQMIIEEQQ' },
+  //   start_location: { lat: 29.9510033, lng: -90.0688704 },
+  //   travel_mode: 'BICYCLING',
+  // },
+  // {
+  //   distance: { text: '0.3 mi', value: 556 },
+  //   duration: { text: '2 mins', value: 127 },
+  //   end_location: { lat: 29.956613, lng: -90.06456329999999 },
+  //   html_instructions: 'Continue onto <b>Chartres St</b>',
+  //   polyline:
+  //     { points: 'ecyuDtlvdP[Y[WmBaBaBwAw@q@kAcAqAiASSKICCuBgB}AwAm@g@CCAAII' },
+  //   start_location: { lat: 29.9526685, lng: -90.06811239999999 },
+  //   travel_mode: 'BICYCLING',
+  // },
+  // {
+  //   distance: { text: '420 ft', value: 128 },
+  //   duration: { text: '1 min', value: 25 },
+  //   end_location: { lat: 29.955912, lng: -90.063511 },
+  //   html_instructions: 'Turn <b>right</b> onto <b>Toulouse St</b>',
+  //   maneuver: 'turn-right',
+  //   polyline: { points: 'y{yuDnvudPFKBGBC@CBE@CLQdByC' },
+  //   start_location: { lat: 29.956613, lng: -90.06456329999999 },
+  //   travel_mode: 'BICYCLING',
+  // },
+  // {
+  //   distance: { text: '0.2 mi', value: 377 },
+  //   duration: { text: '1 min', value: 64 },
+  //   end_location: { lat: 29.958589, lng: -90.061112 },
+  //   html_instructions: 'Turn <b>left</b> onto <b>Decatur St</b>',
+  //   maneuver: 'turn-left',
+  //   polyline: { points: 'mwyuD|oudPiAcAwAgAqAiAi@e@i@e@qAiAiAaAs@q@' },
+  //   start_location: { lat: 29.955912, lng: -90.063511 },
+  //   travel_mode: 'BICYCLING',
+  // },
+  // {
+  //   distance: { text: '0.4 mi', value: 595 },
+  //   duration: { text: '2 mins', value: 103 },
+  //   end_location: { lat: 29.9617966, lng: -90.0561939 },
+  //   html_instructions: 'Continue onto <b>N Peters St</b>',
+  //   polyline:
+  //   {
+  //     points:
+  //       'ehzuD|`udPMSMSm@eAGOwBuDWe@_B{CeBoDw@_Bg@}@AEQWQ]KOU[KMGGECWQ',
+  //   },
+  //   start_location: { lat: 29.958589, lng: -90.061112 },
+  //   travel_mode: 'BICYCLING',
+  // },
+  // {
+  //   distance: { text: '0.4 mi', value: 580 },
+  //   duration: { text: '2 mins', value: 103 },
+  //   end_location: { lat: 29.962302, lng: -90.05020520000001 },
+  //   html_instructions: 'Turn <b>right</b> to stay on <b>N Peters St</b>',
+  //   maneuver: 'turn-right',
+  //   polyline: { points: 'g|zuDdbtdPAi@?IKuBAo@ASSaFSaFGgBOkEKeDAK?EAGAE' },
+  //   start_location: { lat: 29.9617966, lng: -90.0561939 },
+  //   travel_mode: 'BICYCLING',
+  // },
+  // {
+  //   distance: { text: '436 ft', value: 133 },
+  //   duration: { text: '1 min', value: 20 },
+  //   end_location: { lat: 29.9634414, lng: -90.0498179 },
+  //   html_instructions:
+  //     '<b>N Peters St</b> turns slightly <b>left</b> and becomes <b>St Ferdinand St</b>',
+  //   polyline: { points: 'k_{uDx|rdPCECCCAIC_B]UEwAY' },
+  //   start_location: { lat: 29.962302, lng: -90.05020520000001 },
+  //   travel_mode: 'BICYCLING',
+  // },
+  // {
+  //   distance: { text: '0.4 mi', value: 666 },
+  //   duration: { text: '2 mins', value: 117 },
+  //   end_location: { lat: 29.961928, lng: -90.04312379999999 },
+  //   html_instructions: 'Turn <b>right</b> onto <b>Chartres St</b>',
+  //   maneuver: 'turn-right',
+  //   polyline: { points: 'of{uDjzrdPr@aFD]BO?CF]?CFc@XqB\\eCr@{ElAaJd@kD' },
+  //   start_location: { lat: 29.9634414, lng: -90.0498179 },
+  //   travel_mode: 'BICYCLING',
+  // },
+  // {
+  //   distance: { text: '194 ft', value: 59 },
+  //   duration: { text: '1 min', value: 68 },
+  //   end_location: { lat: 29.9624429, lng: -90.0429645 },
+  //   html_instructions:
+  //     'Turn <b>left</b> onto <b>Piety St</b><div style="font-size:0.9em">Walk your bicycle</div><div style="font-size:0.9em">Destination will be on the right</div>',
+  //   maneuver: 'turn-left',
+  //   polyline: { points: 'a}zuDnpqdPeB_@' },
+  //   start_location: { lat: 29.961928, lng: -90.04312379999999 },
+  //   travel_mode: 'BICYCLING',
+  // }];
+
   // res.send({
-  //   polyLine, turnByTurn, peterDistance, peterEndLoc, peterHTML,
+  //   polyLine, turnByTurn, peterRide,
   // });
 });
 
