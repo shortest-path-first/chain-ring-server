@@ -1,20 +1,31 @@
-const {
-  OAuth2Client,
-} = require('google-auth-library');
+const sha = require('sha1');
+const db = require('../db/db');
 
-const client = new OAuth2Client(process.env.CLIENT_ID);
-async function verify(token) {
-  const ticket = await client.verifyIdToken({
-    idToken: token,
-    audience: process.env.CLIENT_ID, // Specify the CLIENT_ID of the app that accesses the backend
-    // Or, if multiple clients access the backend:
-    // [CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
-  });
-  const payload = ticket.getPayload();
-  const userid = payload;
-  // If request specified a G Suite domain:
-  // const domain = payload['hd'];
-  return userid;
-}
+const verify = ({ username, token }, tryUser) => {
+  let found = false;
+  let foundUser = null;
+  if (token) {
+    return db.getUser({ token })
+      .then((users) => {
+        users.forEach((user) => {
+          if (user.password === sha(tryUser.password + user.salt) && found !== true) {
+            found = true;
+            foundUser = user;
+          }
+        });
+        return foundUser;
+      });
+  }
+  return db.getUser({ username })
+    .then((users) => {
+      users.forEach((user) => {
+        if (user.password === sha(tryUser.password + user.salt) && found !== true) {
+          found = true;
+          foundUser = user;
+        }
+      });
+      return foundUser;
+    });
+};
 
 module.exports = verify;
