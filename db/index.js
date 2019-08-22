@@ -13,8 +13,12 @@ const User = sequelize.define('user', {
     type: Sequelize.STRING,
     unique: true,
   },
-  googleId: {
-    type: Sequelize.STRING(30),
+  password: {
+    type: Sequelize.STRING,
+    unique: true,
+  },
+  salt: {
+    type: Sequelize.STRING,
     unique: true,
   },
   avgSpeed: {
