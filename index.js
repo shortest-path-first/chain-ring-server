@@ -146,7 +146,7 @@ app.get('/mapPolyline', (req, res) => {
           // wayPointArr.push(safePath.path[safePath.path.length - 1].reverse());
         }
         res.send({
-          polyLine, turnByTurn, peterRide, safePath,
+          polyLine, turnByTurn, peterRide, safePath, wayPointArr,
         });
       })
       .catch((err) => {
