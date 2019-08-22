@@ -14,7 +14,8 @@
     "google-auth-library": "^5.2.0",
     "google-polyline": "^1.0.3",
     "mysql2": "^1.6.5",
-    "sequelize": "^5.12.3"
+    "sequelize": "^5.12.3",
+    "sha1": "^1.1.1"
   },
   "devDependencies": {
     "eslint": "^5.16.0",
