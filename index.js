@@ -14,7 +14,14 @@ const geojson = require('./db/Bike_Lanes.json');
 
 const newGeoJson = geojsonPick.pickProperties(geojson, { type: 'Feature', properties: { type: 'LineString' } });
 const pathPoints = turf.explode(geojson);
+const testCoords = polyline.decode('m~}uD~yxdPf@w@p@iAT_@T_@dAcBl@aAl@_AN[h@aA`A_Bx@qARYt@oAp@gA|@uAbAaBr@kAnAuBf@y@Ze@TWV[@CNWLQBGLUp@kA`AaBzBmDvBmDtBoDhB}CJM?A@A@AFK@AFI?ALQz@yAT_@T_@p@cA`@m@Xc@jBaDXc@hAoB|AcCT_@j@_A^k@p@gANWd@u@vA_CJUNU|AgC');
+const geoParse = [];
+testCoords.forEach((coord) => {
+  geoParse.push(coord.reverse());
+});
+const testCoordsPath = turf.points(geoParse);
 
+pathPoints.features.concat(testCoordsPath.features);
 const lineStrings = [];
 // console.log(newGeoJson.features[0].geometry);
 for (let i = 0; i < newGeoJson.features.length; i++) {
@@ -109,8 +116,8 @@ app.get('/mapPolyline', (req, res) => {
   // console.log('Nearest:', start, nearestToStart.geometry.coordinates, end, nearestToEnd.geometry.coordinates);
   // let end = { coordinates: [29.973306, -90.052311] };
   // console.log(turf.nearestPointOnLine(, start));
-  
-  let safePath = pathFinder.findPath(startInNetwork, endInNetwork);
+
+  const safePath = pathFinder.findPath(startInNetwork, endInNetwork);
   // let encodedSafePath = polyline.encode(safePath);
   console.log('Path:');
   if (!wayPoint) {
@@ -121,6 +128,17 @@ app.get('/mapPolyline', (req, res) => {
         const turnByTurn = response.data.routes[0].legs[0].steps.map(step => [`${step.html_instructions.replace(/<b>/g, '').replace(/<\/b>/g, '').replace(/<div style="font-size:0.9em">/g, ' ').replace(/<\/div>/g, '')}`, `for ${step.distance.text}/${step.duration.text}`]);
         const peterRide = response.data.routes[0].legs[0].steps;
         // console.log(polyLine, turnByTurn, peterRide);
+        if (safePath !== null) {
+          const wayPointArr = [];
+          const length = safePath.path.length - 2;
+          const divider = Math.floor(length / 8);
+          for (let i = 1; i <= 8; i++) {
+            wayPointArr.push(safePath.path[i * divider]);
+          }
+          wayPointArr.unshift(safePath.path[0]);
+          wayPointArr.push(safePath.path[safePath.path.length - 1]);
+          console.log(wayPointArr);
+        }
         res.send({
           polyLine, turnByTurn, peterRide, safePath,
         });
