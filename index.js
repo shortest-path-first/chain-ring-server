@@ -92,6 +92,11 @@ app.get('/mapSearch', (req, res) => {
   // res.send(filteredResults);
 });
 
+app.get('/safeDirections', (req, res) => {
+  console.log(req.query);
+});
+
+
 app.get('/mapPolyline', (req, res) => {
   // need to pass in location dynamically
   const { place, userLoc, wayPoint } = req.query;
@@ -118,26 +123,27 @@ app.get('/mapPolyline', (req, res) => {
   // console.log(turf.nearestPointOnLine(, start));
 
   const safePath = pathFinder.findPath(startInNetwork, endInNetwork);
+  // safePath.path.unshift(userLoc);
+  // safePath.path.push(place);
   // let encodedSafePath = polyline.encode(safePath);
   console.log('Path:');
   if (!wayPoint) {
     axios.get(`https://maps.googleapis.com/maps/api/directions/json?origin=${userLoc}&destination=${place}&key=AIzaSyAm0rv3w8tQUIPbjDkQyGhQUsK5rAxfBUs&mode=bicycling`)
       .then((response) => {
         // console.log(response.data);
+        const wayPointArr = [];
         const polyLine = response.data.routes[0].overview_polyline.points;
         const turnByTurn = response.data.routes[0].legs[0].steps.map(step => [`${step.html_instructions.replace(/<b>/g, '').replace(/<\/b>/g, '').replace(/<div style="font-size:0.9em">/g, ' ').replace(/<\/div>/g, '')}`, `for ${step.distance.text}/${step.duration.text}`]);
         const peterRide = response.data.routes[0].legs[0].steps;
         // console.log(polyLine, turnByTurn, peterRide);
         if (safePath !== null) {
-          const wayPointArr = [];
           const length = safePath.path.length - 2;
           const divider = Math.floor(length / 8);
           for (let i = 1; i <= 8; i++) {
             wayPointArr.push(safePath.path[i * divider]);
           }
-          wayPointArr.unshift(safePath.path[0]);
-          wayPointArr.push(safePath.path[safePath.path.length - 1]);
-          console.log(wayPointArr);
+          // wayPointArr.unshift(safePath.path[0].reverse());
+          // wayPointArr.push(safePath.path[safePath.path.length - 1].reverse());
         }
         res.send({
           polyLine, turnByTurn, peterRide, safePath,
