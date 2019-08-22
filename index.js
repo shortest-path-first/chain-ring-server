@@ -8,26 +8,29 @@ const axios = require('axios');
 const polyline = require('google-polyline');
 const PathFinder = require('geojson-path-finder');
 const { point } = require('@turf/helpers');
+
 const geojsonPick = require('geojson-pick');
 const geojson = require('./db/Bike_Lanes.json');
 
 const newGeoJson = geojsonPick.pickProperties(geojson, { type: 'Feature', properties: { type: 'LineString' } });
+const pathPoints = turf.explode(geojson);
 
 const lineStrings = [];
 // console.log(newGeoJson.features[0].geometry);
 for (let i = 0; i < newGeoJson.features.length; i++) {
   newGeoJson.features[i].geometry.coordinates.forEach((line) => {
     if (typeof line[0] === 'number') {
-      lineStrings.push(line);
+      lineStrings.push(line.reverse());
     }
   });
 }
 
 // const position = turf.point([29.9778299, -90.0801842]);
 const actualLineStrings = turf.lineString(lineStrings);
+
 // const nearest = turf.nearestPointOnLine(actualLineStrings, position);
 
-const pathFinder = new PathFinder(geojson);
+const pathFinder = new PathFinder(geojson, { precision: 1e-3 });
 const db = require('./db/db');
 const {
   info,
@@ -89,22 +92,27 @@ app.get('/mapPolyline', (req, res) => {
   let commaIndex = userLoc.indexOf(',');
   const startLat = userLoc.slice(0, commaIndex);
   const startLng = userLoc.slice(commaIndex + 1);
-  console.log(startLng); 
+  console.log(startLng);
   commaIndex = place.indexOf(',');
   const endLat = place.slice(0, commaIndex);
   const endLng = place.slice(commaIndex + 1);
-  // console.log(userLoc, place);
-  console.log(Number(startLat), Number(startLng), Number(endLat), Number(endLng));
-  const start = turf.point([Number(startLat), Number(startLng)]);
-  const end = turf.point([Number(endLat), Number(endLng)]);
-  const nearestToStart = turf.nearestPointOnLine(actualLineStrings, start);
-  const nearestToEnd = turf.nearestPointOnLine(actualLineStrings, end);
-  console.log('Nearest:', nearestToStart, nearestToEnd);
+  console.log(startLat, startLng, endLat, endLng);
+  console.log(actualLineStrings.geometry.coordinates[0]);
+  const start = turf.point([Number(startLng), Number(startLat)].reverse());
+  const end = turf.point([Number(endLng), Number(endLat)].reverse());
+  // const nearestToStart = turf.nearestPointOnLine(actualLineStrings, start);
+  // const nearestToEnd = turf.nearestPointOnLine(actualLineStrings, end);
+  const startInNetwork = turf.nearest(start, pathPoints);
+  const endInNetwork = turf.nearest(end, pathPoints);
+  console.log(startInNetwork, endInNetwork);
+  // console.log("end:", end);
+  // console.log('Nearest:', start, nearestToStart.geometry.coordinates, end, nearestToEnd.geometry.coordinates);
   // let end = { coordinates: [29.973306, -90.052311] };
   // console.log(turf.nearestPointOnLine(, start));
-  // const path = pathFinder.findPath(start, end);
-  // const path = pathFinder.findPath(userLoc, wayPoint);
-  // console.log('Path:', path);
+  
+  let safePath = pathFinder.findPath(startInNetwork, endInNetwork);
+  // let encodedSafePath = polyline.encode(safePath);
+  console.log('Path:');
   if (!wayPoint) {
     axios.get(`https://maps.googleapis.com/maps/api/directions/json?origin=${userLoc}&destination=${place}&key=AIzaSyAm0rv3w8tQUIPbjDkQyGhQUsK5rAxfBUs&mode=bicycling`)
       .then((response) => {
@@ -112,9 +120,9 @@ app.get('/mapPolyline', (req, res) => {
         const polyLine = response.data.routes[0].overview_polyline.points;
         const turnByTurn = response.data.routes[0].legs[0].steps.map(step => [`${step.html_instructions.replace(/<b>/g, '').replace(/<\/b>/g, '').replace(/<div style="font-size:0.9em">/g, ' ').replace(/<\/div>/g, '')}`, `for ${step.distance.text}/${step.duration.text}`]);
         const peterRide = response.data.routes[0].legs[0].steps;
-        console.log(polyLine, turnByTurn, peterRide);
+        // console.log(polyLine, turnByTurn, peterRide);
         res.send({
-          polyLine, turnByTurn, peterRide,
+          polyLine, turnByTurn, peterRide, safePath,
         });
       })
       .catch((err) => {
