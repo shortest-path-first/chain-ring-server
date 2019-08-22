@@ -57,10 +57,10 @@ app.get('/mapPolyline', (req, res) => {
   //     console.log(response.data);
   //     const polyLine = response.data.routes[0].overview_polyline.points;
   //     const turnByTurn = response.data.routes[0].legs[0].steps.map(step => [`${step.html_instructions.replace(/<b>/g, '').replace(/<\/b>/g, '').replace(/<div style="font-size:0.9em">/g, ' ').replace(/<\/div>/g, '')}`, `for ${step.distance.text}/${step.duration.text}`]);
-  //     const peterRide = response.data.routes[0].legs[0].steps
-  //     console.log(polyLine, turnByTurn, peterDistance, peterHTML, peterEndLoc);
+  //     const peterRide = response.data.routes[0].legs[0].steps;
+  //     // console.log(polyLine, turnByTurn, peterDistance, peterHTML, peterEndLoc);
   //     res.send({
-  //       polyLine, turnByTurn, peterDistance, peterHTML, peterEndLoc,
+  //       polyLine, turnByTurn, peterRide,
   //     });
   //   })
   //   .catch((err) => {
@@ -375,8 +375,16 @@ app.patch('/user', (req, res) => {
 });
 
 app.get('/marker', (req, res) => {
-  res.end();
+  const sampleData = [{ markerLat: 29.969557, markerLon: -90.093964, type: 'pothole' },
+    { markerLat: 29.977275, markerLon: -90.076834, type: 'close' },
+    { markerLat: 29.976877, markerLon: -90.097837, type: 'avoid' },
+    { markerLat: 29.935434, markerLon: -90.081013, type: 'stolen' },
+    { markerLat: 29.923302, markerLon: -90.085120, type: 'pothole' },
+    { markerLat: 29.924040, markerLon: -90.086611, type: 'crash' },
+  ];
+  res.send(sampleData);
 });
+
 app.post('/marker', (req, res) => {
   res.end();
 });
