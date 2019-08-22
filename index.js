@@ -149,7 +149,6 @@ app.get('/mapPolyline', (req, res) => {
               //   const steps = leg.steps.map(step => [`${step.html_instructions.replace(/<b>/g, '').replace(/<\/b>/g, '').replace(/<div style="font-size:0.9em">/g, ' ').replace(/<\/div>/g, '')}`, `for ${step.distance.text}/${step.duration.text}`]);
               //   console.log(steps);
               // });
-              console.log("SAFE:", safePolyline);
               res.send({
                 polyLine, turnByTurn, peterRide, safePath, wayPointArr, safePolyline,
               });
