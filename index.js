@@ -99,19 +99,19 @@ app.get('/mapPolyline', (req, res) => {
   let commaIndex = userLoc.indexOf(',');
   const startLat = userLoc.slice(0, commaIndex);
   const startLng = userLoc.slice(commaIndex + 1);
-  console.log(startLng);
+  // console.log(startLng);
   commaIndex = place.indexOf(',');
   const endLat = place.slice(0, commaIndex);
   const endLng = place.slice(commaIndex + 1);
-  console.log(startLat, startLng, endLat, endLng);
-  console.log(actualLineStrings.geometry.coordinates[0]);
+  // console.log(startLat, startLng, endLat, endLng);
+  // console.log(actualLineStrings.geometry.coordinates[0]);
   const start = turf.point([Number(startLng), Number(startLat)].reverse());
   const end = turf.point([Number(endLng), Number(endLat)].reverse());
   // const nearestToStart = turf.nearestPointOnLine(actualLineStrings, start);
   // const nearestToEnd = turf.nearestPointOnLine(actualLineStrings, end);
   const startInNetwork = turf.nearest(start, pathPoints);
   const endInNetwork = turf.nearest(end, pathPoints);
-  //console.log(startInNetwork, endInNetwork);
+  // console.log(startInNetwork, endInNetwork);
   // console.log("end:", end);
   // console.log('Nearest:', start, nearestToStart.geometry.coordinates, end, nearestToEnd.geometry.coordinates);
   // let end = { coordinates: [29.973306, -90.052311] };
@@ -123,6 +123,7 @@ app.get('/mapPolyline', (req, res) => {
   // let encodedSafePath = polyline.encode(safePath);
   console.log('Path:');
   if (!wayPoint) {
+    let safePolyline;
     axios.get(`https://maps.googleapis.com/maps/api/directions/json?origin=${userLoc}&destination=${place}&key=AIzaSyAm0rv3w8tQUIPbjDkQyGhQUsK5rAxfBUs&mode=bicycling`)
       .then((response) => {
         // console.log(response.data);
@@ -139,13 +140,23 @@ app.get('/mapPolyline', (req, res) => {
             waypointStr += `${safePath.path[i * divider]}|`;
           }
           const waypointCall = `${safePath.path[0]}|${waypointStr}${safePath.path[safePath.path.length - 1]}`;
-          console.log("waypointcall", waypointCall);
-          // wayPointArr.unshift(safePath.path[0].reverse());
-          // wayPointArr.push(safePath.path[safePath.path.length - 1].reverse());
+          console.log('waypointcall', waypointCall);
+          axios.get(`https://maps.googleapis.com/maps/api/directions/json?origin=${userLoc}&destination=${place}&key=AIzaSyAm0rv3w8tQUIPbjDkQyGhQUsK5rAxfBUs&mode=bicycling&waypoints=${waypointCall}`)
+            .then((safeResponse) => {
+              safePolyline = safeResponse.data.routes[0].overview_polyline.points;
+              const safeTurnByTurn = [];
+              //  safeResponse.data.routes[0].legs.forEach((leg) => {
+              //   const steps = leg.steps.map(step => [`${step.html_instructions.replace(/<b>/g, '').replace(/<\/b>/g, '').replace(/<div style="font-size:0.9em">/g, ' ').replace(/<\/div>/g, '')}`, `for ${step.distance.text}/${step.duration.text}`]);
+              //   console.log(steps);
+              // });
+              console.log("SAFE:", safePolyline);
+              res.send({
+                polyLine, turnByTurn, peterRide, safePath, wayPointArr, safePolyline,
+              });
+            }).catch((safeErr) => {
+              console.error('waypoint', safeErr);
+            });
         }
-        res.send({
-          polyLine, turnByTurn, peterRide, safePath, wayPointArr,
-        });
       })
       .catch((err) => {
         res.send(err);
