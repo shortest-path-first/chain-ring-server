@@ -48,6 +48,7 @@ const login = token => User.findAll({
         loginStatus: true,
       });
     }
+    console.log(user);
   });
 
 const logout = token => User.findAll({
@@ -65,21 +66,37 @@ const logout = token => User.findAll({
   });
 
 
-const addUser = ({ googleId, token }) => User.build({
-  googleId,
+const addUser = ({
+  username,
+  newPassword,
+  salt,
+  token,
+}) => User.build({
+  name: username,
+  password: newPassword,
+  salt,
   avgSpeedCount: 0,
-  loginToken: token,
   loginStatus: true,
+  loginToken: token,
 }).save();
 
-const getUser = ({ googleId }) => User.findAll({
-  where: {
-    googleId,
-  },
-});
+const getUser = ({ token, username }) => {
+  if (token) {
+    return User.findAll({
+      where: {
+        loginToken: token,
+      },
+    });
+  }
+  return User.findAll({
+    where: {
+      name: username,
+    },
+  });
+};
 
 const updateUser = ({
-  googleId,
+  token,
   speed,
   distance,
   savings,
@@ -88,7 +105,7 @@ const updateUser = ({
   if (speed !== undefined) {
     User.findAll({
       where: {
-        googleId,
+        loginToken: token,
       },
     })
       .then((users) => {
@@ -111,7 +128,7 @@ const updateUser = ({
   if (distance !== undefined) {
     User.findAll({
       where: {
-        googleId,
+        loginToken: token,
       },
     })
       .then((users) => {
@@ -129,7 +146,7 @@ const updateUser = ({
   if (savings !== undefined) {
     User.findAll({
       where: {
-        googleId,
+        loginToken: token,
       },
     })
       .then((users) => {
@@ -146,10 +163,10 @@ const updateUser = ({
   }
 };
 
-const addRide = ({ googleId, lineString, routeTime }, coords, res) => {
+const addRide = ({ token, lineString, routeTime }, coords, res) => {
   User.findAll({
     where: {
-      googleId,
+      loginToken: token,
     },
   }).then((users) => {
     const user = users[0];
@@ -163,7 +180,7 @@ const addRide = ({ googleId, lineString, routeTime }, coords, res) => {
       endLon: coords[coords.length - 1][1],
     }).save();
   });
-  addStat({ lineString, googleId }, res);
+  addStat({ lineString, token }, res);
 };
 
 const addRoute = () => {
@@ -171,11 +188,11 @@ const addRoute = () => {
 };
 
 const addStat = ({
-  googleId,
+  token,
   lineString,
 }, res) => User.findAll({
   where: {
-    googleId,
+    loginToken: token,
   },
 }).then((users) => {
   console.log(users);
@@ -246,9 +263,9 @@ const addStat = ({
     }, res);
   });
 
-const getStat = googleId => User.findAll({
+const getStat = token => User.findAll({
   where: {
-    googleId,
+    loginToken: token,
   },
 })
   .then((users) => {
