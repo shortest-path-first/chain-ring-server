@@ -92,11 +92,6 @@ app.get('/mapSearch', (req, res) => {
   // res.send(filteredResults);
 });
 
-app.get('/safeDirections', (req, res) => {
-  console.log(req.query);
-});
-
-
 app.get('/mapPolyline', (req, res) => {
   // need to pass in location dynamically
   const { place, userLoc, wayPoint } = req.query;
@@ -116,7 +111,7 @@ app.get('/mapPolyline', (req, res) => {
   // const nearestToEnd = turf.nearestPointOnLine(actualLineStrings, end);
   const startInNetwork = turf.nearest(start, pathPoints);
   const endInNetwork = turf.nearest(end, pathPoints);
-  console.log(startInNetwork, endInNetwork);
+  //console.log(startInNetwork, endInNetwork);
   // console.log("end:", end);
   // console.log('Nearest:', start, nearestToStart.geometry.coordinates, end, nearestToEnd.geometry.coordinates);
   // let end = { coordinates: [29.973306, -90.052311] };
@@ -139,9 +134,12 @@ app.get('/mapPolyline', (req, res) => {
         if (safePath !== null) {
           const length = safePath.path.length - 2;
           const divider = Math.floor(length / 8);
+          let waypointStr = '';
           for (let i = 1; i <= 8; i++) {
-            wayPointArr.push(safePath.path[i * divider]);
+            waypointStr += `${safePath.path[i * divider]}|`;
           }
+          const waypointCall = `${safePath.path[0]}|${waypointStr}${safePath.path[safePath.path.length - 1]}`;
+          console.log("waypointcall", waypointCall);
           // wayPointArr.unshift(safePath.path[0].reverse());
           // wayPointArr.push(safePath.path[safePath.path.length - 1].reverse());
         }
