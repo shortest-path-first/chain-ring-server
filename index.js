@@ -2,6 +2,7 @@
 const express = require('express');
 const axios = require('axios');
 const polyline = require('google-polyline');
+const sha = require('sha1');
 const db = require('./db/db');
 const {
   info,
@@ -14,6 +15,19 @@ app.use(express.json());
 const port = process.env.PORT || 3000;
 
 const usedTokens = [];
+const makeRandom = () => {
+  let result = '';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charactersLength = characters.length;
+  const length = Math.random() * (150 - 100) + 100;
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  if (usedTokens.includes(result)) {
+    return makeRandom();
+  }
+  return result;
+};
 
 app.all('/', (req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -149,33 +163,52 @@ app.get('/userTotals', (req, res) => {
 });
 
 app.get('/login/:token', (req, res) => {
-  setTimeout(() => {
-    db.isLoggedIn(req.params.token)
-      .then((bool) => {
-        console.log(bool);
-        res.send({
-          bool,
-        });
-      })
-      .catch((error) => {
-        res.statusCode = 500;
-        res.send({
-          bool: false,
-        });
+  // () => {
+  db.isLoggedIn(req.params.token)
+    .then((bool) => {
+      console.log(bool);
+      res.send({
+        bool,
       });
-  }, 400);
+    })
+    .catch((error) => {
+      console.error(error);
+      res.statusCode = 500;
+      res.send({
+        bool: false,
+      });
+    });
+  // }
 });
-app.patch('/login/:token', (req, res) => {
-  db.login(req.body.token)
-    .then(() => {
-      res.send('User Logged In');
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+  auth({ username }, { password })
+    .then((user) => {
+      if (user) {
+        db.login(user.loginToken)
+          .then(() => {
+            res.send(user.loginToken);
+          });
+      } else {
+        res.statusCode = 404;
+        res.end('User not found');
+      }
     });
 });
-app.patch('/logout/:token', (req, res) => {
-  db.logout(req.params.token)
+app.post('/logout', (req, res) => {
+  const { token } = req.body;
+  // auth({ token }, { password })
+  // .then((user) => {
+  // if (user) {
+  db.logout(token)
     .then(() => {
-      res.send('User Logged Out');
+      res.end('User Logged Out');
     });
+  // } else {
+  // res.statusCode = 404;
+  // res.end('User not found');
+  // }
+  // });
 });
 
 app.get('/userStats', (req, res) => {
@@ -226,7 +259,7 @@ app.get('/user/:idToken', (req, res) => {
   } = req.params;
   auth(idToken)
     .then((userInfo) => {
-      db.getUser(userInfo.sub)
+      db.getUser(userInfo.token)
         .then((users) => {
           res.send(users[0]);
         })
@@ -240,71 +273,42 @@ app.get('/user/:idToken', (req, res) => {
 app.post('/userInfo', (req, res) => {
   console.log(req.body);
   const {
-    accesstoken,
-    idToken,
+    username,
+    password,
   } = req.body;
-  auth(idToken)
-    .then((userInfo) => {
-      console.log(userInfo);
-      db.getUser({
-        googleId: userInfo.sub,
-      })
-        .then((users) => {
-          if (users[0] === undefined) {
-            const makeId = () => {
-              let result = '';
-              const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-              const charactersLength = characters.length;
-              const length = Math.random() * (250 - 150) + 150;
-              for (let i = 0; i < length; i++) {
-                result += characters.charAt(Math.floor(Math.random() * charactersLength));
-              }
-              if (usedTokens.includes(result)) {
-                return makeId();
-              }
-              return result;
-            };
-            const token = makeId();
-            db.addUser({
-              googleId: userInfo.sub,
-              token,
-            })
-              .then(() => {
-                res.statusCode = 201;
-                res.send({ token });
-              });
-            console.log(userInfo);
-          } else {
-            const {
-              loginToken,
-            } = users[0];
-
-            res.send({
-              loginToken,
-            });
-          }
+  auth({ username }, { password })
+    .then((user) => {
+      if (user) {
+        res.statusCode = 200;
+        res.send(user.loginToken);
+      } else {
+        const salt = makeRandom();
+        const token = makeRandom();
+        const newPassword = sha(password + salt);
+        console.log(newPassword);
+        db.addUser({
+          username,
+          newPassword,
+          salt,
+          token,
         });
-    })
-    .catch((err) => {
-      console.error(err);
-      res.statusCode = 500;
-      res.end('Something went Wrong');
+        res.statusCode = 201;
+        res.send(token);
+      }
     });
 });
 app.patch('/user', (req, res) => {
   const {
-    idToken,
+    username,
     speed,
     distance,
   } = req.body;
-  auth(idToken)
-    .then((userInfo) => {
-      db.updateUser({
-        googleId: userInfo.sub,
-        speed,
-        distance,
-      }, res);
-    });
+
+  db.updateUser({
+    username,
+    speed,
+    distance,
+  }, res);
 });
 
 app.get('/marker', (req, res) => {
