@@ -145,12 +145,17 @@ app.get('/mapPolyline', (req, res) => {
             .then((safeResponse) => {
               safePolyline = safeResponse.data.routes[0].overview_polyline.points;
               const safeTurnByTurn = [];
-              //  safeResponse.data.routes[0].legs.forEach((leg) => {
-              //   const steps = leg.steps.map(step => [`${step.html_instructions.replace(/<b>/g, '').replace(/<\/b>/g, '').replace(/<div style="font-size:0.9em">/g, ' ').replace(/<\/div>/g, '')}`, `for ${step.distance.text}/${step.duration.text}`]);
-              //   console.log(steps);
-              // });
+              const safeRide = [];
+              // console.log(Array.isArray(safeResponse.data.routes[0].legs));
+              safeResponse.data.routes[0].legs.forEach((leg) => {
+                const instruction = leg.steps.map(step => [`${step.html_instructions.replace(/<b>/g, '').replace(/<\/b>/g, '').replace(/<div style="font-size:0.9em">/g, ' ').replace(/<\/div>/g, '')}`, `for ${step.distance.text}/${step.duration.text}`]);
+                safeTurnByTurn.push(instruction);
+                safeRide.push(leg.steps);
+              });
+
+              console.log(safeRide);
               res.send({
-                polyLine, turnByTurn, peterRide, safePath, wayPointArr, safePolyline,
+                polyLine, turnByTurn, peterRide, safePath, wayPointArr, safePolyline, safeTurnByTurn, safeRide,
               });
             }).catch((safeErr) => {
               console.error('waypoint', safeErr);
