@@ -14,8 +14,9 @@ const {
 
 console.log(User);
 
-const addMarker = () => {
-  Marker.build({}).save();
+const addMarker = (markers) => {
+
+  Marker.bulkCreate(markers);
 };
 
 const addLocation = () => {
