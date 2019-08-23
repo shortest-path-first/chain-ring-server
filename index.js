@@ -346,8 +346,8 @@ app.post('/userInfo', (req, res) => {
   auth({ username }, { password })
     .then((user) => {
       if (user) {
-        res.statusCode = 200;
-        res.send(user.loginToken);
+        res.statusCode = 400;
+        res.end('User exists');
       } else {
         const salt = makeRandom();
         const token = makeRandom();
@@ -358,9 +358,15 @@ app.post('/userInfo', (req, res) => {
           newPassword,
           salt,
           token,
-        });
-        res.statusCode = 201;
-        res.send(token);
+        })
+          .then(() => {
+            res.statusCode = 201;
+            res.send(token);
+          })
+          .catch(() => {
+            res.statusCode = 400;
+            res.end('User exists');
+          });
       }
     });
 });
