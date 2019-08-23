@@ -396,6 +396,7 @@ app.get('/marker', (req, res) => {
 });
 
 app.post('/marker', (req, res) => {
+  db.addMarker();
   res.end();
 });
 app.patch('/marker', (req, res) => {
@@ -406,6 +407,7 @@ app.get('/location', (req, res) => {
   res.end();
 });
 app.post('/location', (req, res) => {
+  db.addLocation();
   res.end();
 });
 app.patch('/location', (req, res) => {
@@ -441,9 +443,10 @@ app.patch('/stat', (req, res) => {
 });
 
 app.get('/route', (req, res) => {
-  res.end(); ls;
+  res.end();
 });
 app.post('/route', (req, res) => {
+  db.addRoute();
   res.end();
 });
 app.patch('/route', (req, res) => {
