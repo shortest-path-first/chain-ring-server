@@ -52,23 +52,23 @@ const Ride = sequelize.define('ride', {
       key: 'id',
     },
   },
-  lineString: {
+  polyLine: {
     type: Sequelize.STRING, // Checkout Range
   },
   routeTime: {
     type: Sequelize.STRING,
   },
-  startLat: {
+  avgSpeed: {
     type: Sequelize.FLOAT(11),
   },
-  startLon: {
+  topSpeed: {
     type: Sequelize.FLOAT(11),
   },
-  endLat: {
+  totalDistance: {
     type: Sequelize.FLOAT(11),
   },
-  endLon: {
-    type: Sequelize.FLOAT(11),
+  breakdown: {
+    type: Sequelize.STRING,
   },
 },
 {
