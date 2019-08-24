@@ -13,8 +13,12 @@ const User = sequelize.define('user', {
     type: Sequelize.STRING,
     unique: true,
   },
-  googleId: {
-    type: Sequelize.STRING(30),
+  password: {
+    type: Sequelize.STRING,
+    unique: true,
+  },
+  salt: {
+    type: Sequelize.STRING,
     unique: true,
   },
   avgSpeed: {
@@ -26,8 +30,8 @@ const User = sequelize.define('user', {
   totalDistance: {
     type: Sequelize.FLOAT(11),
   },
-  totalSavings: {
-    type: Sequelize.FLOAT(11),
+  totalDuration: {
+    type: Sequelize.INTEGER,
   },
   loginToken: {
     type: Sequelize.STRING,
@@ -48,23 +52,26 @@ const Ride = sequelize.define('ride', {
       key: 'id',
     },
   },
-  lineString: {
+  polyLine: {
     type: Sequelize.STRING, // Checkout Range
   },
-  routeTime: {
+  duration: {
     type: Sequelize.STRING,
   },
-  startLat: {
+  avgSpeed: {
     type: Sequelize.FLOAT(11),
   },
-  startLon: {
+  topSpeed: {
     type: Sequelize.FLOAT(11),
   },
-  endLat: {
+  totalDistance: {
     type: Sequelize.FLOAT(11),
   },
-  endLon: {
-    type: Sequelize.FLOAT(11),
+  breakdown: {
+    type: Sequelize.STRING,
+  },
+  rideTime: {
+    type: Sequelize.STRING,
   },
 },
 {
@@ -150,18 +157,14 @@ const Location = sequelize.define('location', {
       key: 'id',
     },
   },
-  rideId: {
-    type: Sequelize.INTEGER,
-    references: {
-      model: 'rides',
-      key: 'id',
-    },
-  },
   lat: {
     type: Sequelize.FLOAT(11),
   },
   lon: {
     type: Sequelize.FLOAT(11),
+  },
+  name: {
+    type: Sequelize.STRING,
   },
 },
 {

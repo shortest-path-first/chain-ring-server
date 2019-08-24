@@ -6,6 +6,7 @@ const turf = require('@turf/turf');
 const express = require('express');
 const axios = require('axios');
 const polyline = require('google-polyline');
+const sha = require('sha1');
 const PathFinder = require('geojson-path-finder');
 const { point } = require('@turf/helpers');
 
@@ -49,6 +50,19 @@ app.use(express.json());
 const port = process.env.PORT || 3000;
 
 const usedTokens = [];
+const makeRandom = () => {
+  let result = '';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charactersLength = characters.length;
+  const length = Math.random() * (150 - 100) + 100;
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  if (usedTokens.includes(result)) {
+    return makeRandom();
+  }
+  return result;
+};
 
 app.all('/', (req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -312,86 +326,112 @@ app.get('/mapPolyline', (req, res) => {
 
 app.get('/userTotals', (req, res) => {
   console.log(req);
-  const object = {
-    avgSpeed: 20,
-    totalDistance: 136,
-    costSavings: 200,
-    stationaryTime: 800,
-    pieChart: [{ Speed: '< 25%', Amount: 20 }, { Speed: '25% - 50%', Amount: 40 }, { Speed: '50% - 75%', Amount: 50 }, { Speed: '> 75%', Amount: 10 }],
-  };
-  res.send(object);
+  // const object = {
+  //   avgSpeed: 20,
+  //   totalDistance: 136,
+  //   costSavings: 200,
+  //   stationaryTime: 800,
+  //   pieChart: [{ Speed: '< 25%', Amount: 20 }, { Speed: '25% - 50%', Amount: 40 }, { Speed: '50% - 75%', Amount: 50 }, { Speed: '> 75%', Amount: 10 }],
+  // };
+  db.getUser(req.query)
+    .then((users) => {
+      res.send(users[0]);
+    });
 });
 
 app.get('/login/:token', (req, res) => {
-  console.log(req);
-  setTimeout(() => {
-    db.isLoggedIn(req.params.token)
-      .then((bool) => {
-        console.log(bool);
-        res.send({
-          bool,
-        });
-      })
-      .catch((error) => {
-        res.statusCode = 500;
-        res.send({
-          bool: false,
-        });
+  // () => {
+  db.isLoggedIn(req.params.token)
+    .then((bool) => {
+      console.log(bool);
+      res.send({
+        bool,
       });
-  }, 400);
+    })
+    .catch((error) => {
+      console.error(error);
+      res.statusCode = 500;
+      res.send({
+        bool: false,
+      });
+    });
+  // }
 });
-app.patch('/login/:token', (req, res) => {
-  db.login(req.body.token)
-    .then(() => {
-      res.send('User Logged In');
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+  auth({ username }, { password })
+    .then((user) => {
+      if (user) {
+        db.login(user.loginToken)
+          .then(() => {
+            res.send(user.loginToken);
+          });
+      } else {
+        res.statusCode = 404;
+        res.end('User not found');
+      }
     });
 });
-app.patch('/logout/:token', (req, res) => {
-  db.logout(req.params.token)
+app.post('/logout', (req, res) => {
+  const { token } = req.body;
+  // auth({ token }, { password })
+  // .then((user) => {
+  // if (user) {
+  db.logout(token)
     .then(() => {
-      res.send('User Logged Out');
+      res.end('User Logged Out');
     });
+  // } else {
+  // res.statusCode = 404;
+  // res.end('User not found');
+  // }
+  // });
 });
 
 app.get('/userStats', (req, res) => {
   console.log(req);
-  const recentRides = [{
-    avgSpeed: 10,
-    totalDistance: 3.5,
-    costSavings: 100,
-    stationaryTime: 200,
-    pieChart: [{ Speed: '< 25%', Amount: 10 }, { Speed: '25% - 50%', Amount: 30 }, { Speed: '50% - 75%', Amount: 30 }, { Speed: '> 75%', Amount: 30 }],
-  },
-  {
-    avgSpeed: 20,
-    totalDistance: 200,
-    costSavings: 200,
-    stationaryTime: 400,
-    pieChart: [{ Speed: '< 25%', Amount: 20 }, { Speed: '25% - 50%', Amount: 60 }, { Speed: '50% - 75%', Amount: 50 }, { Speed: '> 75%', Amount: 10 }],
-  },
-  {
-    avgSpeed: 30,
-    totalDistance: 300,
-    costSavings: 300,
-    stationaryTime: 600,
-    pieChart: [{ Speed: '< 25%', Amount: 20 }, { Speed: '25% - 50%', Amount: 40 }, { Speed: '50% - 75%', Amount: 50 }, { Speed: '> 75%', Amount: 80 }],
-  },
-  {
-    avgSpeed: 40,
-    totalDistance: 400,
-    costSavings: 400,
-    stationaryTime: 800,
-    pieChart: [{ Speed: '< 25%', Amount: 30 }, { Speed: '25% - 50%', Amount: 40 }, { Speed: '50% - 75%', Amount: 70 }, { Speed: '> 75%', Amount: 10 }],
-  },
-  {
-    avgSpeed: 50,
-    totalDistance: 500,
-    costSavings: 500,
-    stationaryTime: 1000,
-    pieChart: [{ Speed: '< 25%', Amount: 5 }, { Speed: '25% - 50%', Amount: 80 }, { Speed: '50% - 75%', Amount: 50 }, { Speed: '> 75%', Amount: 20 }],
-  },
-  ];
-  res.send(recentRides);
+  // const recentRides = [{
+  //   avgSpeed: 10,
+  //   totalDistance: 3.5,
+  //   costSavings: 100,
+  //   stationaryTime: 200,
+  //   pieChart: [{ Speed: '< 25%', Amount: 10 }, { Speed: '25% - 50%', Amount: 30 }, { Speed: '50% - 75%', Amount: 30 }, { Speed: '> 75%', Amount: 30 }],
+  // },
+  // {
+  //   avgSpeed: 20,
+  //   totalDistance: 200,
+  //   costSavings: 200,
+  //   stationaryTime: 400,
+  //   pieChart: [{ Speed: '< 25%', Amount: 20 }, { Speed: '25% - 50%', Amount: 60 }, { Speed: '50% - 75%', Amount: 50 }, { Speed: '> 75%', Amount: 10 }],
+  // },
+  // {
+  //   avgSpeed: 30,
+  //   totalDistance: 300,
+  //   costSavings: 300,
+  //   stationaryTime: 600,
+  //   pieChart: [{ Speed: '< 25%', Amount: 20 }, { Speed: '25% - 50%', Amount: 40 }, { Speed: '50% - 75%', Amount: 50 }, { Speed: '> 75%', Amount: 80 }],
+  // },
+  // {
+  //   avgSpeed: 40,
+  //   totalDistance: 400,
+  //   costSavings: 400,
+  //   stationaryTime: 800,
+  //   pieChart: [{ Speed: '< 25%', Amount: 30 }, { Speed: '25% - 50%', Amount: 40 }, { Speed: '50% - 75%', Amount: 70 }, { Speed: '> 75%', Amount: 10 }],
+  // },
+  // {
+  //   avgSpeed: 50,
+  //   totalDistance: 500,
+  //   costSavings: 500,
+  //   stationaryTime: 1000,
+  //   pieChart: [{ Speed: '< 25%', Amount: 5 }, { Speed: '25% - 50%', Amount: 80 }, { Speed: '50% - 75%', Amount: 50 }, { Speed: '> 75%', Amount: 20 }],
+  // },
+  // ];
+
+  db.getRides({ token: req.query.token })
+    .then((rides) => {
+      console.log(rides);
+      res.send(rides.slice(rides.length - 5));
+    });
 });
 
 
@@ -401,7 +441,7 @@ app.get('/user/:idToken', (req, res) => {
   } = req.params;
   auth(idToken)
     .then((userInfo) => {
-      db.getUser(userInfo.sub)
+      db.getUser(userInfo.token)
         .then((users) => {
           res.send(users[0]);
         })
@@ -415,71 +455,48 @@ app.get('/user/:idToken', (req, res) => {
 app.post('/userInfo', (req, res) => {
   console.log(req.body);
   const {
-    accesstoken,
-    idToken,
+    username,
+    password,
   } = req.body;
-  auth(idToken)
-    .then((userInfo) => {
-      console.log(userInfo);
-      db.getUser({
-        googleId: userInfo.sub,
-      })
-        .then((users) => {
-          if (users[0] === undefined) {
-            const makeId = () => {
-              let result = '';
-              const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-              const charactersLength = characters.length;
-              const length = Math.random() * (250 - 150) + 150;
-              for (let i = 0; i < length; i++) {
-                result += characters.charAt(Math.floor(Math.random() * charactersLength));
-              }
-              if (usedTokens.includes(result)) {
-                return makeId();
-              }
-              return result;
-            };
-            const token = makeId();
-            db.addUser({
-              googleId: userInfo.sub,
-              token,
-            })
-              .then(() => {
-                res.statusCode = 201;
-                res.send({ token });
-              });
-            console.log(userInfo);
-          } else {
-            const {
-              loginToken,
-            } = users[0];
-
-            res.send({
-              loginToken,
-            });
-          }
-        });
-    })
-    .catch((err) => {
-      console.error(err);
-      res.statusCode = 500;
-      res.end('Something went Wrong');
+  auth({ username }, { password })
+    .then((user) => {
+      if (user) {
+        res.statusCode = 400;
+        res.end('User exists');
+      } else {
+        const salt = makeRandom();
+        const token = makeRandom();
+        const newPassword = sha(password + salt);
+        console.log(newPassword);
+        db.addUser({
+          username,
+          newPassword,
+          salt,
+          token,
+        })
+          .then(() => {
+            res.statusCode = 201;
+            res.send(token);
+          })
+          .catch(() => {
+            res.statusCode = 400;
+            res.end('User exists');
+          });
+      }
     });
 });
 app.patch('/user', (req, res) => {
   const {
-    idToken,
+    username,
     speed,
     distance,
   } = req.body;
-  auth(idToken)
-    .then((userInfo) => {
-      db.updateUser({
-        googleId: userInfo.sub,
-        speed,
-        distance,
-      }, res);
-    });
+
+  db.updateUser({
+    username,
+    speed,
+    distance,
+  }, res);
 });
 
 app.get('/marker', (req, res) => {
@@ -498,10 +515,18 @@ app.patch('/marker', (req, res) => {
 });
 
 app.get('/location', (req, res) => {
-  res.end();
+  db.getLocations(req.query)
+    .then((locations) => {
+      res.send(locations);
+    });
 });
 app.post('/location', (req, res) => {
-  res.end();
+  console.log(req);
+  db.addLocation(req.query)
+    .then(() => {
+      res.statusCode = 201;
+      res.end('Location saved');
+    });
 });
 app.patch('/location', (req, res) => {
   res.end();
@@ -511,6 +536,9 @@ app.get('/stat/:username', (req, res) => {
   const {
     username,
   } = req.params;
+  /**
+   *
+   */
   db.getStat(username)
     .then((something) => {
       console.log(something);
@@ -540,6 +568,7 @@ app.get('/route', (req, res) => {
 });
 
 app.post('/route', (req, res) => {
+  db.addRoute();
   res.end();
 });
 app.patch('/route', (req, res) => {
@@ -551,21 +580,17 @@ app.get('/ride', (req, res) => {
 });
 
 app.post('/ride', (req, res) => {
-  const {
-    username,
-    lineString,
-    routeTime,
-  } = req.body;
+  // const {
+  //   username,
+  //   lineString,
+  //   routeTime,
+  // } = req.body;
 
-  const coords = polyline.decode(lineString);
+  db.addRide(Object.create(req.query))
+    .then(() => {
+      res.end('Ride saved');
+    });
 
-  db.addRide({
-    username,
-    lineString,
-    routeTime,
-  }, coords, res);
-
-  console.log(coords);
   // console.log(polyline.decode(coords));
   // db.addRide(coords, polyline.decode(coords));
   // res.end();

@@ -15,13 +15,39 @@ const {
 console.log(User);
 
 const addMarker = (markers) => {
-
   Marker.bulkCreate(markers);
 };
 
-const addLocation = () => {
-  Location.build({}).save();
-};
+const addLocation = ({
+ token, lat, lng, loc 
+}) => User.findAll({
+  where: {
+    loginToken: token,
+  },
+})
+  .then((users) => {
+    const user = users[0];
+    return Location.build({
+      userId: user.id,
+      lat,
+      lon: lng,
+      name: loc,
+    }).save();
+  });
+
+const getLocations = ({ token }) => User.findAll({
+  where: {
+    loginToken: token,
+  },
+})
+  .then((users) => {
+    const user = users[0];
+    return Location.findAll({
+      where: {
+        userId: user.id,
+      },
+    });
+  });
 
 const isLoggedIn = token => User.findAll({
   where: {
@@ -49,6 +75,7 @@ const login = token => User.findAll({
         loginStatus: true,
       });
     }
+    console.log(user);
   });
 
 const logout = token => User.findAll({
@@ -66,30 +93,46 @@ const logout = token => User.findAll({
   });
 
 
-const addUser = ({ googleId, token }) => User.build({
-  googleId,
+const addUser = ({
+  username,
+  newPassword,
+  salt,
+  token,
+}) => User.build({
+  name: username,
+  password: newPassword,
+  salt,
   avgSpeedCount: 0,
-  loginToken: token,
   loginStatus: true,
+  loginToken: token,
 }).save();
 
-const getUser = ({ googleId }) => User.findAll({
-  where: {
-    googleId,
-  },
-});
+const getUser = ({ token, username }) => {
+  if (token) {
+    return User.findAll({
+      where: {
+        loginToken: token,
+      },
+    });
+  }
+  return User.findAll({
+    where: {
+      name: username,
+    },
+  });
+};
 
 const updateUser = ({
-  googleId,
+  token,
   speed,
   distance,
-  savings,
+  duration,
   // stationaryTime
 }, res) => {
   if (speed !== undefined) {
     User.findAll({
       where: {
-        googleId,
+        loginToken: token,
       },
     })
       .then((users) => {
@@ -112,7 +155,7 @@ const updateUser = ({
   if (distance !== undefined) {
     User.findAll({
       where: {
-        googleId,
+        loginToken: token,
       },
     })
       .then((users) => {
@@ -127,17 +170,21 @@ const updateUser = ({
         res.end('Distance updated');
       });
   }
-  if (savings !== undefined) {
+  if (duration !== undefined) {
     User.findAll({
       where: {
-        googleId,
+        loginToken: token,
       },
     })
       .then((users) => {
         const user = users[0];
+        let totalTime = 0;
         if (user) {
+          if (user.totalDuration !== 'null') {
+            totalTime = user.totalDuration;
+          }
           user.update({
-            totalSavings: user.totalSavings + savings,
+            totalDuration: totalTime + Math.floor(duration),
           });
         }
       })
@@ -147,109 +194,99 @@ const updateUser = ({
   }
 };
 
-const addRide = ({ googleId, lineString, routeTime }, coords, res) => {
-  User.findAll({
-    where: {
-      googleId,
-    },
-  }).then((users) => {
+const addRide = ({
+  average,
+  duration,
+  polyLine,
+  topSpeed,
+  totalDistance,
+  token,
+  breakdown,
+  rideTime,
+}) => User.findAll({
+  where: {
+    loginToken: token,
+  },
+})
+  .then((users) => {
+    console.log(rideTime);
     const user = users[0];
+    let newSpeed;
+    if (typeof Number(topSpeed) !== 'number' || topSpeed === 'null') {
+      newSpeed = 0;
+    } else {
+      newSpeed = Number(topSpeed);
+    }
+    let newDistance;
+    if (typeof Number(totalDistance) !== 'number' || totalDistance === 'null') {
+      newDistance = 0;
+    } else {
+      newDistance = Number(totalDistance);
+    }
+    let newAverage;
+    if (typeof Number(average) !== 'number' || average === 'null') {
+      newAverage = 0;
+    } else {
+      newAverage = Number(average);
+    }
+
     Ride.build({
       userId: user.id,
-      lineString,
-      routeTime,
-      startLat: coords[0][0],
-      startLon: coords[0][1],
-      endLat: coords[coords.length - 1][0],
-      endLon: coords[coords.length - 1][1],
+      polyLine,
+      duration: Math.floor(duration),
+      avgSpeed: newAverage,
+      topSpeed: newSpeed,
+      totalDistance: newDistance,
+      breakdown,
+      rideTime,
     }).save();
+    return {
+      user,
+      avg: newAverage,
+      newDistance,
+    };
+  })
+  .then(({ user, avg, newDistance }) => {
+    // const newAverage = ((user.avgSpeed * user.avgSpeedCount) + avg) / (user.avgSpeedCount + 1);
+    console.log(user, avg, newDistance);
+    updateUser({
+ token: user.loginToken, speed: avg, distance: newDistance, duration 
+});
+    // .then(() => {
+
+    // });
+    // user.update({
+    //   avgSpeed: newAverage,
+    //   avgSpeedCount: user.avgSpeedCount + 1,
+    //   totalDistance: user.totalDistance + newDistance,
+    //   totalDuration: user.totalDuration + duration,
+    // });
   });
-  addStat({ lineString, googleId }, res);
-};
+const getRides = ({ token }) => User.findAll({
+  where: {
+    loginToken: token,
+  },
+})
+  .then((users) => {
+    const user = users[0];
+    return Ride.findAll({
+      where: {
+        userId: user.id,
+      },
+    });
+  });
 
 const addRoute = () => {
   Route.build({}).save();
 };
 
-const addStat = ({
-  googleId,
-  lineString,
-}, res) => User.findAll({
-  where: {
-    googleId,
-  },
-}).then((users) => {
-  console.log(users);
-  return {
-    user: users[0],
-  };
-})
-  .then(({
-    user,
-  }) => Ride.findAll({
-    where: {
-      userId: user.id,
-      lineString,
-    },
-  })
-    .then((rides) => {
-      console.log('rides', user);
-      return { ride: rides[0], user };
-    }))
-  .then(({ ride, user }) => {
-    // axios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=29.97341,-90.05237&destinations=enc:${lineString}:&key=${process.env.GOOGLE_KEY}&mode=bicycling`)
-    //   .then((rideInfo) => {
-    //     rideInfo
-    //     let {
-    //       distance,
-    //       duration
-    //     } = rideInfo.rows[rideInfo.rows.length - 1]
-    //       .elements[rideInfo.rows[rideInfo.rows.length - 1].elements.length - 1];
-    //     distance = Number(distance.text.match(/[1-9,.]/g).join(''));
-    //     duration = Number(duration.text.match(/[1-9]/g).join(''));
-    //     console.log(duration);
-    //     const avgSpeed = (distance) * (60 / duration);
-    //     const savings = distance * 2.660;
-    //     Stat.build({
-    //       userId: user.id,
-    //       rideId: ride.id,
-    //       avgSpeed,
-    //       costSavings: savings,
-    //       // stationaryTime: ,
-    //     }).save();
-    //     updateUser({
-    //       name: user.name,
-    //       distance,
-    //       speed: avgSpeed,
-    //       savings,
-    //     }, res);
-    //   });
+const addStat = () => {
 
-    let { distance, duration } = distanceTime.rows[distanceTime.rows.length - 1]
-      .elements[distanceTime.rows[distanceTime.rows.length - 1].elements.length - 1];
-    distance = Number(distance.text.match(/[1-9,.]/g).join(''));
-    duration = Number(duration.text.match(/[1-9]/g).join(''));
-    console.log(duration);
-    const avgSpeed = (distance) * (60 / duration);
-    const savings = distance * 2.660;
-    Stat.build({
-      userId: user.id,
-      rideId: ride.id,
-      avgSpeed,
-      costSavings: savings,
-      // stationaryTime: ,
-    }).save();
-    updateUser({
-      id: user.id,
-      distance,
-      speed: avgSpeed,
-      savings,
-    }, res);
-  });
+};
 
-const getStat = googleId => User.findAll({
+const getStat = token => User.findAll({
   where: {
-    googleId,
+    loginToken: token,
   },
 })
   .then((users) => {
@@ -266,6 +303,7 @@ const getStat = googleId => User.findAll({
 
 module.exports = {
   addLocation,
+  getLocations,
   addMarker,
   addRide,
   addRoute,
@@ -274,6 +312,7 @@ module.exports = {
   addUser,
   updateUser,
   getUser,
+  getRides,
   isLoggedIn,
   login,
   logout,
