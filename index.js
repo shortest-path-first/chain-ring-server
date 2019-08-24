@@ -326,14 +326,17 @@ app.get('/mapPolyline', (req, res) => {
 
 app.get('/userTotals', (req, res) => {
   console.log(req);
-  const object = {
-    avgSpeed: 20,
-    totalDistance: 136,
-    costSavings: 200,
-    stationaryTime: 800,
-    pieChart: [{ Speed: '< 25%', Amount: 20 }, { Speed: '25% - 50%', Amount: 40 }, { Speed: '50% - 75%', Amount: 50 }, { Speed: '> 75%', Amount: 10 }],
-  };
-  res.send(object);
+  // const object = {
+  //   avgSpeed: 20,
+  //   totalDistance: 136,
+  //   costSavings: 200,
+  //   stationaryTime: 800,
+  //   pieChart: [{ Speed: '< 25%', Amount: 20 }, { Speed: '25% - 50%', Amount: 40 }, { Speed: '50% - 75%', Amount: 50 }, { Speed: '> 75%', Amount: 10 }],
+  // };
+  db.getUser(req.query)
+    .then((users) => {
+      res.send(users[0]);
+    });
 });
 
 app.get('/login/:token', (req, res) => {
@@ -387,43 +390,48 @@ app.post('/logout', (req, res) => {
 
 app.get('/userStats', (req, res) => {
   console.log(req);
-  const recentRides = [{
-    avgSpeed: 10,
-    totalDistance: 3.5,
-    costSavings: 100,
-    stationaryTime: 200,
-    pieChart: [{ Speed: '< 25%', Amount: 10 }, { Speed: '25% - 50%', Amount: 30 }, { Speed: '50% - 75%', Amount: 30 }, { Speed: '> 75%', Amount: 30 }],
-  },
-  {
-    avgSpeed: 20,
-    totalDistance: 200,
-    costSavings: 200,
-    stationaryTime: 400,
-    pieChart: [{ Speed: '< 25%', Amount: 20 }, { Speed: '25% - 50%', Amount: 60 }, { Speed: '50% - 75%', Amount: 50 }, { Speed: '> 75%', Amount: 10 }],
-  },
-  {
-    avgSpeed: 30,
-    totalDistance: 300,
-    costSavings: 300,
-    stationaryTime: 600,
-    pieChart: [{ Speed: '< 25%', Amount: 20 }, { Speed: '25% - 50%', Amount: 40 }, { Speed: '50% - 75%', Amount: 50 }, { Speed: '> 75%', Amount: 80 }],
-  },
-  {
-    avgSpeed: 40,
-    totalDistance: 400,
-    costSavings: 400,
-    stationaryTime: 800,
-    pieChart: [{ Speed: '< 25%', Amount: 30 }, { Speed: '25% - 50%', Amount: 40 }, { Speed: '50% - 75%', Amount: 70 }, { Speed: '> 75%', Amount: 10 }],
-  },
-  {
-    avgSpeed: 50,
-    totalDistance: 500,
-    costSavings: 500,
-    stationaryTime: 1000,
-    pieChart: [{ Speed: '< 25%', Amount: 5 }, { Speed: '25% - 50%', Amount: 80 }, { Speed: '50% - 75%', Amount: 50 }, { Speed: '> 75%', Amount: 20 }],
-  },
-  ];
-  res.send(recentRides);
+  // const recentRides = [{
+  //   avgSpeed: 10,
+  //   totalDistance: 3.5,
+  //   costSavings: 100,
+  //   stationaryTime: 200,
+  //   pieChart: [{ Speed: '< 25%', Amount: 10 }, { Speed: '25% - 50%', Amount: 30 }, { Speed: '50% - 75%', Amount: 30 }, { Speed: '> 75%', Amount: 30 }],
+  // },
+  // {
+  //   avgSpeed: 20,
+  //   totalDistance: 200,
+  //   costSavings: 200,
+  //   stationaryTime: 400,
+  //   pieChart: [{ Speed: '< 25%', Amount: 20 }, { Speed: '25% - 50%', Amount: 60 }, { Speed: '50% - 75%', Amount: 50 }, { Speed: '> 75%', Amount: 10 }],
+  // },
+  // {
+  //   avgSpeed: 30,
+  //   totalDistance: 300,
+  //   costSavings: 300,
+  //   stationaryTime: 600,
+  //   pieChart: [{ Speed: '< 25%', Amount: 20 }, { Speed: '25% - 50%', Amount: 40 }, { Speed: '50% - 75%', Amount: 50 }, { Speed: '> 75%', Amount: 80 }],
+  // },
+  // {
+  //   avgSpeed: 40,
+  //   totalDistance: 400,
+  //   costSavings: 400,
+  //   stationaryTime: 800,
+  //   pieChart: [{ Speed: '< 25%', Amount: 30 }, { Speed: '25% - 50%', Amount: 40 }, { Speed: '50% - 75%', Amount: 70 }, { Speed: '> 75%', Amount: 10 }],
+  // },
+  // {
+  //   avgSpeed: 50,
+  //   totalDistance: 500,
+  //   costSavings: 500,
+  //   stationaryTime: 1000,
+  //   pieChart: [{ Speed: '< 25%', Amount: 5 }, { Speed: '25% - 50%', Amount: 80 }, { Speed: '50% - 75%', Amount: 50 }, { Speed: '> 75%', Amount: 20 }],
+  // },
+  // ];
+
+  db.getRides({ token: req.query.token })
+    .then((rides) => {
+      console.log(rides);
+      res.send(rides.slice(rides.length - 5));
+    });
 });
 
 
@@ -507,11 +515,18 @@ app.patch('/marker', (req, res) => {
 });
 
 app.get('/location', (req, res) => {
-  res.end();
+  db.getLocations(req.query)
+    .then((locations) => {
+      res.send(locations);
+    });
 });
 app.post('/location', (req, res) => {
-  db.addLocation();
-  res.end();
+  console.log(req);
+  db.addLocation(req.query)
+    .then(() => {
+      res.statusCode = 201;
+      res.end('Location saved');
+    });
 });
 app.patch('/location', (req, res) => {
   res.end();
@@ -522,7 +537,7 @@ app.get('/stat/:username', (req, res) => {
     username,
   } = req.params;
   /**
-   * 
+   *
    */
   db.getStat(username)
     .then((something) => {
@@ -571,7 +586,10 @@ app.post('/ride', (req, res) => {
   //   routeTime,
   // } = req.body;
 
-  db.addRide(Object.create(req.query));
+  db.addRide(Object.create(req.query))
+    .then(() => {
+      res.end('Ride saved');
+    });
 
   // console.log(polyline.decode(coords));
   // db.addRide(coords, polyline.decode(coords));
