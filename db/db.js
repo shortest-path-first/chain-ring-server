@@ -14,8 +14,8 @@ const {
 
 console.log(User);
 
-const addMarker = () => {
-  Marker.build({}).save();
+const addMarker = (markers) => {
+  Marker.bulkCreate(markers);
 };
 
 const addLocation = () => {
@@ -163,105 +163,42 @@ const updateUser = ({
   }
 };
 
-const addRide = ({ token, lineString, routeTime }, coords, res) => {
+const addRide = ({
+  average,
+  duration,
+  polyLine,
+  topSpeed,
+  totalDistance,
+  token,
+  breakdown,
+}) => {
   User.findAll({
     where: {
       loginToken: token,
     },
-  }).then((users) => {
-    const user = users[0];
-    Ride.build({
-      userId: user.id,
-      lineString,
-      routeTime,
-      startLat: coords[0][0],
-      startLon: coords[0][1],
-      endLat: coords[coords.length - 1][0],
-      endLon: coords[coords.length - 1][1],
+  })
+    .then((users) => {
+      const user = users[0];
+
+      Ride.build({
+        userId: user.id,
+        polyLine,
+        routeTime: duration,
+        avgSpeed: average,
+        topSpeed,
+        totalDistance,
+        breakdown,
+      });
     }).save();
-  });
-  addStat({ lineString, token }, res);
 };
 
 const addRoute = () => {
   Route.build({}).save();
 };
 
-const addStat = ({
-  token,
-  lineString,
-}, res) => User.findAll({
-  where: {
-    loginToken: token,
-  },
-}).then((users) => {
-  console.log(users);
-  return {
-    user: users[0],
-  };
-})
-  .then(({
-    user,
-  }) => Ride.findAll({
-    where: {
-      userId: user.id,
-      lineString,
-    },
-  })
-    .then((rides) => {
-      console.log('rides', user);
-      return { ride: rides[0], user };
-    }))
-  .then(({ ride, user }) => {
-    // axios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=29.97341,-90.05237&destinations=enc:${lineString}:&key=${process.env.GOOGLE_KEY}&mode=bicycling`)
-    //   .then((rideInfo) => {
-    //     rideInfo
-    //     let {
-    //       distance,
-    //       duration
-    //     } = rideInfo.rows[rideInfo.rows.length - 1]
-    //       .elements[rideInfo.rows[rideInfo.rows.length - 1].elements.length - 1];
-    //     distance = Number(distance.text.match(/[1-9,.]/g).join(''));
-    //     duration = Number(duration.text.match(/[1-9]/g).join(''));
-    //     console.log(duration);
-    //     const avgSpeed = (distance) * (60 / duration);
-    //     const savings = distance * 2.660;
-    //     Stat.build({
-    //       userId: user.id,
-    //       rideId: ride.id,
-    //       avgSpeed,
-    //       costSavings: savings,
-    //       // stationaryTime: ,
-    //     }).save();
-    //     updateUser({
-    //       name: user.name,
-    //       distance,
-    //       speed: avgSpeed,
-    //       savings,
-    //     }, res);
-    //   });
+const addStat = () => {
 
-    let { distance, duration } = distanceTime.rows[distanceTime.rows.length - 1]
-      .elements[distanceTime.rows[distanceTime.rows.length - 1].elements.length - 1];
-    distance = Number(distance.text.match(/[1-9,.]/g).join(''));
-    duration = Number(duration.text.match(/[1-9]/g).join(''));
-    console.log(duration);
-    const avgSpeed = (distance) * (60 / duration);
-    const savings = distance * 2.660;
-    Stat.build({
-      userId: user.id,
-      rideId: ride.id,
-      avgSpeed,
-      costSavings: savings,
-      // stationaryTime: ,
-    }).save();
-    updateUser({
-      id: user.id,
-      distance,
-      speed: avgSpeed,
-      savings,
-    }, res);
-  });
+};
 
 const getStat = token => User.findAll({
   where: {
