@@ -30,8 +30,8 @@ const User = sequelize.define('user', {
   totalDistance: {
     type: Sequelize.FLOAT(11),
   },
-  totalSavings: {
-    type: Sequelize.FLOAT(11),
+  totalDuration: {
+    type: Sequelize.INTEGER,
   },
   loginToken: {
     type: Sequelize.STRING,
@@ -55,7 +55,7 @@ const Ride = sequelize.define('ride', {
   polyLine: {
     type: Sequelize.STRING, // Checkout Range
   },
-  routeTime: {
+  duration: {
     type: Sequelize.STRING,
   },
   avgSpeed: {
@@ -68,6 +68,9 @@ const Ride = sequelize.define('ride', {
     type: Sequelize.FLOAT(11),
   },
   breakdown: {
+    type: Sequelize.STRING,
+  },
+  rideTime: {
     type: Sequelize.STRING,
   },
 },
@@ -154,18 +157,14 @@ const Location = sequelize.define('location', {
       key: 'id',
     },
   },
-  rideId: {
-    type: Sequelize.INTEGER,
-    references: {
-      model: 'rides',
-      key: 'id',
-    },
-  },
   lat: {
     type: Sequelize.FLOAT(11),
   },
   lon: {
     type: Sequelize.FLOAT(11),
+  },
+  name: {
+    type: Sequelize.STRING,
   },
 },
 {
