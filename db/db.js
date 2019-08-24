@@ -18,9 +18,36 @@ const addMarker = (markers) => {
   Marker.bulkCreate(markers);
 };
 
-const addLocation = () => {
-  Location.build({}).save();
-};
+const addLocation = ({
+ token, lat, lng, loc 
+}) => User.findAll({
+  where: {
+    loginToken: token,
+  },
+})
+  .then((users) => {
+    const user = users[0];
+    return Location.build({
+      userId: user.id,
+      lat,
+      lon: lng,
+      name: loc,
+    }).save();
+  });
+
+const getLocations = ({ token }) => User.findAll({
+  where: {
+    loginToken: token,
+  },
+})
+  .then((users) => {
+    const user = users[0];
+    return Location.findAll({
+      where: {
+        userId: user.id,
+      },
+    });
+  });
 
 const isLoggedIn = token => User.findAll({
   where: {
@@ -99,7 +126,7 @@ const updateUser = ({
   token,
   speed,
   distance,
-  savings,
+  duration,
   // stationaryTime
 }, res) => {
   if (speed !== undefined) {
@@ -143,7 +170,7 @@ const updateUser = ({
         res.end('Distance updated');
       });
   }
-  if (savings !== undefined) {
+  if (duration !== undefined) {
     User.findAll({
       where: {
         loginToken: token,
@@ -151,9 +178,13 @@ const updateUser = ({
     })
       .then((users) => {
         const user = users[0];
+        let totalTime = 0;
         if (user) {
+          if (user.totalDuration !== 'null') {
+            totalTime = user.totalDuration;
+          }
           user.update({
-            totalSavings: user.totalSavings + savings,
+            totalDuration: totalTime + Math.floor(duration),
           });
         }
       })
@@ -171,26 +202,79 @@ const addRide = ({
   totalDistance,
   token,
   breakdown,
-}) => {
-  User.findAll({
-    where: {
-      loginToken: token,
-    },
-  })
-    .then((users) => {
-      const user = users[0];
+  rideTime,
+}) => User.findAll({
+  where: {
+    loginToken: token,
+  },
+})
+  .then((users) => {
+    console.log(rideTime);
+    const user = users[0];
+    let newSpeed;
+    if (typeof Number(topSpeed) !== 'number' || topSpeed === 'null') {
+      newSpeed = 0;
+    } else {
+      newSpeed = Number(topSpeed);
+    }
+    let newDistance;
+    if (typeof Number(totalDistance) !== 'number' || totalDistance === 'null') {
+      newDistance = 0;
+    } else {
+      newDistance = Number(totalDistance);
+    }
+    let newAverage;
+    if (typeof Number(average) !== 'number' || average === 'null') {
+      newAverage = 0;
+    } else {
+      newAverage = Number(average);
+    }
 
-      Ride.build({
-        userId: user.id,
-        polyLine,
-        routeTime: duration,
-        avgSpeed: average,
-        topSpeed,
-        totalDistance,
-        breakdown,
-      });
+    Ride.build({
+      userId: user.id,
+      polyLine,
+      duration: Math.floor(duration),
+      avgSpeed: newAverage,
+      topSpeed: newSpeed,
+      totalDistance: newDistance,
+      breakdown,
+      rideTime,
     }).save();
-};
+    return {
+      user,
+      avg: newAverage,
+      newDistance,
+    };
+  })
+  .then(({ user, avg, newDistance }) => {
+    // const newAverage = ((user.avgSpeed * user.avgSpeedCount) + avg) / (user.avgSpeedCount + 1);
+    console.log(user, avg, newDistance);
+    updateUser({
+ token: user.loginToken, speed: avg, distance: newDistance, duration 
+});
+    // .then(() => {
+
+    // });
+    // user.update({
+    //   avgSpeed: newAverage,
+    //   avgSpeedCount: user.avgSpeedCount + 1,
+    //   totalDistance: user.totalDistance + newDistance,
+    //   totalDuration: user.totalDuration + duration,
+    // });
+  });
+const getRides = ({ token }) => User.findAll({
+  where: {
+    loginToken: token,
+  },
+})
+  .then((users) => {
+    const user = users[0];
+    return Ride.findAll({
+      where: {
+        userId: user.id,
+      },
+    });
+  });
 
 const addRoute = () => {
   Route.build({}).save();
@@ -219,6 +303,7 @@ const getStat = token => User.findAll({
 
 module.exports = {
   addLocation,
+  getLocations,
   addMarker,
   addRide,
   addRoute,
@@ -227,6 +312,7 @@ module.exports = {
   addUser,
   updateUser,
   getUser,
+  getRides,
   isLoggedIn,
   login,
   logout,
