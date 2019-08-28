@@ -1,8 +1,3 @@
-const polyline = require('google-polyline');
-const axios = require('axios');
-const {
-  distanceTime,
-} = require('../data');
 const {
   Marker,
   Location,
@@ -14,12 +9,13 @@ const {
 
 console.log(User);
 
-const addMarker = (markers) => {
-  Marker.bulkCreate(markers);
-};
+const addMarker = markers => Marker.bulkCreate(markers);
 
 const addLocation = ({
- token, lat, lng, loc 
+  token,
+  lat,
+  lng,
+  loc,
 }) => User.findAll({
   where: {
     loginToken: token,
@@ -250,17 +246,8 @@ const addRide = ({
     // const newAverage = ((user.avgSpeed * user.avgSpeedCount) + avg) / (user.avgSpeedCount + 1);
     console.log(user, avg, newDistance);
     updateUser({
- token: user.loginToken, speed: avg, distance: newDistance, duration 
-});
-    // .then(() => {
-
-    // });
-    // user.update({
-    //   avgSpeed: newAverage,
-    //   avgSpeedCount: user.avgSpeedCount + 1,
-    //   totalDistance: user.totalDistance + newDistance,
-    //   totalDuration: user.totalDuration + duration,
-    // });
+      token: user.loginToken, speed: avg, distance: newDistance, duration 
+    });
   });
 const getRides = ({ token }) => User.findAll({
   where: {
