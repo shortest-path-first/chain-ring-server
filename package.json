@@ -14,7 +14,7 @@
     "@turf/nearest-point-on-line": "^6.0.2",
     "@turf/turf": "^5.1.6",
     "axios": "^0.19.0",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "geojson-path-finder": "^1.5.2",
     "geojson-pick": "^1.0.0",
     "google-auth-library": "^5.2.0",
